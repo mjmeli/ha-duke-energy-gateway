@@ -1,0 +1,10 @@
+{
+  "domain": "duke_energy_gateway",
+  "name": "Duke Energy Gateway",
+  "documentation": "https://github.com/mjmeli/ha-duke-energy-gateway",
+  "issue_tracker": "https://github.com/mjmeli/ha-duke-energy-gateway/issues",
+  "dependencies": [],
+  "config_flow": true,
+  "codeowners": ["@mjmeli"],
+  "requirements": []
+}
