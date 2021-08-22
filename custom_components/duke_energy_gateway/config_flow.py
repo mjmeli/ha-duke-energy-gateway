@@ -5,8 +5,8 @@ from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from pyduke_energy import DukeEnergyClient
 
-from .const import CONF_PASSWORD
 from .const import CONF_EMAIL
+from .const import CONF_PASSWORD
 from .const import DOMAIN
 from .const import PLATFORMS
 

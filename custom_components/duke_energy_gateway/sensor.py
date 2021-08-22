@@ -1,8 +1,9 @@
 """Sensor platform for Duke Energy Gateway."""
-from pyduke_energy.types import MeterInfo, GatewayStatus, UsageMeasurement
-
 from homeassistant.components.sensor import STATE_CLASS_TOTAL_INCREASING
 from homeassistant.util import dt
+from pyduke_energy.types import GatewayStatus
+from pyduke_energy.types import MeterInfo
+from pyduke_energy.types import UsageMeasurement
 
 from .const import DOMAIN
 from .entity import DukeEnergyGatewayEntity

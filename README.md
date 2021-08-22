@@ -19,11 +19,11 @@ please look at the [User Guide in the Cookiecutter documentation](https://cookie
 
 **This component will set up the following platforms.**
 
-| Platform        | Description                                                               |
-| --------------- | ------------------------------------------------------------------------- |
-| `binary_sensor` | Show something `True` or `False`.                                         |
+| Platform        | Description                             |
+| --------------- | --------------------------------------- |
+| `binary_sensor` | Show something `True` or `False`.       |
 | `sensor`        | Show info from Duke Energy Gateway API. |
-| `switch`        | Switch something `True` or `False`.                                       |
+| `switch`        | Switch something `True` or `False`.     |
 
 ![example][exampleimg]
 

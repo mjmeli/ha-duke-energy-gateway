@@ -1,5 +1,4 @@
 """Constants for Duke Energy Gateway."""
-
 # Base component constants
 NAME = "Duke Energy Gateway"
 DOMAIN = "duke_energy_gateway"

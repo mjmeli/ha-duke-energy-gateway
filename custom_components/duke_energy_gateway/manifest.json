@@ -6,10 +6,6 @@
   "issue_tracker": "https://github.com/mjmeli/ha-duke-energy-gateway/issues",
   "dependencies": [],
   "config_flow": true,
-  "codeowners": [
-    "@mjmeli"
-  ],
-  "requirements": [
-    "pyduke-energy==0.0.3"
-  ]
+  "codeowners": ["@mjmeli"],
+  "requirements": ["pyduke-energy==0.0.3"]
 }

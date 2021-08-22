@@ -1,8 +1,7 @@
 """DukeEnergyGatewayEntity class"""
-from pyduke_energy.types import MeterInfo, GatewayStatus
-
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.util import dt
+from pyduke_energy.types import GatewayStatus
+from pyduke_energy.types import MeterInfo
 
 from .const import ATTRIBUTION
 from .const import DOMAIN
@@ -11,11 +10,18 @@ from .const import VERSION
 
 
 class DukeEnergyGatewayEntity(CoordinatorEntity):
-    def __init__(self, coordinator, config_entry, entity_id, meter, gateway):
+    def __init__(
+        self,
+        coordinator,
+        config_entry,
+        entity_id: str,
+        meter: MeterInfo,
+        gateway: GatewayStatus,
+    ):
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._entity_id = entity_id
-        self._meter = entity_id
+        self._meter = meter
         self._gateway = gateway
 
     @property

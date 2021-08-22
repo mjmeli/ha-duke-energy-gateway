@@ -16,11 +16,10 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.util import dt
-
 from pyduke_energy import DukeEnergyClient
 
-from .const import CONF_PASSWORD
 from .const import CONF_EMAIL
+from .const import CONF_PASSWORD
 from .const import DOMAIN
 from .const import PLATFORMS
 from .const import STARTUP_MESSAGE
