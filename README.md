@@ -1,9 +1,10 @@
 # <img height="80" src="https://github.com/mjmeli/ha-duke-energy-gateway/blob/main/assets/logo.png?raw=true" alt="Duke Energy Logo"> Duke Energy Gateway
 
 [![GitHub Release][releases-shield]][releases]
+[![GitHub Build][build-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
-[![License][license-shield]](LICENSE)
 
+[![License][license-shield]](LICENSE)
 [![pre-commit][pre-commit-shield]][pre-commit]
 [![Black][black-shield]][black]
 
@@ -92,4 +93,6 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/mjmeli/ha-duke-energy-gateway.svg?style=for-the-badge
 [releases]: https://github.com/mjmeli/ha-duke-energy-gateway/releases
+[build-shield]: https://img.shields.io/github/workflow/status/mjmeli/ha-duke-energy-gateway/Linting?style=for-the-badge
+[build]: https://github.com/mjmeli/ha-duke-energy-gateway/actions/workflows/tests.yaml
 [user_profile]: https://github.com/mjmeli
