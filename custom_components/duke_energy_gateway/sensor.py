@@ -1,5 +1,5 @@
 """Sensor platform for Duke Energy Gateway."""
-from homeassistant.components.sensor import STATE_CLASS_MEASUREMENT
+from homeassistant.components.sensor import STATE_CLASS_MEASUREMENT, SensorEntity
 from homeassistant.util import dt
 from pyduke_energy.types import GatewayStatus
 from pyduke_energy.types import MeterInfo
@@ -7,7 +7,6 @@ from pyduke_energy.types import UsageMeasurement
 
 from .const import DOMAIN
 from .entity import DukeEnergyGatewayEntity
-
 
 class _Sensor:
     def __init__(self, entity_id, name, unit, icon, device_class):
@@ -49,7 +48,7 @@ async def async_setup_entry(hass, entry, async_add_devices):
     async_add_devices(sensors)
 
 
-class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity):
+class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity):
     """duke_energy_gateway Sensor class."""
 
     def __init__(

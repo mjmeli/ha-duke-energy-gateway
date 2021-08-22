@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.0.4] - 2021-08-22
+
+### Fixed
+
+- Usage sensor not being tracked with a state_class of measurement (which is needed to show it in the energy dashboard).
+
 ## [0.0.3] - 2021-08-22
 
 ### Fixed
@@ -33,7 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Pulls today's current energy usage into entity sensor.duke_energy_usage_today_kwh
 
-[unreleased]: https://github.com//mjmeli/ha-duke-energy-gateway/compare/0.0.3...HEAD
+[unreleased]: https://github.com//mjmeli/ha-duke-energy-gateway/compare/0.0.4...HEAD
+[0.0.2]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.4
 [0.0.2]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.3
 [0.0.2]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.2
 [0.0.1]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.1
