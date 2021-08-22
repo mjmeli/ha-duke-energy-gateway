@@ -3,15 +3,15 @@
     "step": {
       "user": {
         "title": "Duke Energy Gateway",
-        "description": "If you need help with the configuration have a look here: https://github.com/mjmeli/ha-duke-energy-gateway",
+        "description": "Enter the email and password that you use to connect to Duke Energy below. If you need help with the configuration have a look here: https://github.com/mjmeli/ha-duke-energy-gateway",
         "data": {
-          "username": "Username",
+          "email": "Email",
           "password": "Password"
         }
       }
     },
     "error": {
-      "auth": "Username/Password is wrong."
+      "auth": "Email/Password is wrong."
     },
     "abort": {
       "single_instance_allowed": "Only a single instance is allowed."

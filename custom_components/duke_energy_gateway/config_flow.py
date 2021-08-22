@@ -3,10 +3,10 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from pyduke_energy import DukeEnergyClient
 
-from .api import DukeEnergyGatewayApiClient
 from .const import CONF_PASSWORD
-from .const import CONF_USERNAME
+from .const import CONF_EMAIL
 from .const import DOMAIN
 from .const import PLATFORMS
 
@@ -26,16 +26,16 @@ class DukeEnergyGatewayFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self._errors = {}
 
         # Uncomment the next 2 lines if only a single instance of the integration is allowed:
-        # if self._async_current_entries():
-        #     return self.async_abort(reason="single_instance_allowed")
+        if self._async_current_entries():
+            return self.async_abort(reason="single_instance_allowed")
 
         if user_input is not None:
             valid = await self._test_credentials(
-                user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
+                user_input[CONF_EMAIL], user_input[CONF_PASSWORD]
             )
             if valid:
                 return self.async_create_entry(
-                    title=user_input[CONF_USERNAME], data=user_input
+                    title=user_input[CONF_EMAIL], data=user_input
                 )
             else:
                 self._errors["base"] = "auth"
@@ -54,18 +54,18 @@ class DukeEnergyGatewayFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
-                {vol.Required(CONF_USERNAME): str, vol.Required(CONF_PASSWORD): str}
+                {vol.Required(CONF_EMAIL): str, vol.Required(CONF_PASSWORD): str}
             ),
             errors=self._errors,
         )
 
-    async def _test_credentials(self, username, password):
+    async def _test_credentials(self, email, password):
         """Return true if credentials is valid."""
         try:
             session = async_create_clientsession(self.hass)
-            client = DukeEnergyGatewayApiClient(username, password, session)
-            await client.async_get_data()
-            return True
+            client = DukeEnergyClient(email, password, session)
+            account_list = await client.get_account_list()
+            return account_list and len(account_list) > 0
         except Exception:  # pylint: disable=broad-except
             pass
         return False
@@ -102,5 +102,5 @@ class DukeEnergyGatewayOptionsFlowHandler(config_entries.OptionsFlow):
     async def _update_options(self):
         """Update config entry options."""
         return self.async_create_entry(
-            title=self.config_entry.data.get(CONF_USERNAME), data=self.options
+            title=self.config_entry.data.get(CONF_EMAIL), data=self.options
         )
