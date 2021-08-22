@@ -1,4 +1,4 @@
-# Duke Energy Gateway
+# <img height="80" src="https://github.com/mjmeli/ha-duke-energy-gateway/blob/main/icons/full_logo.png?raw=true" alt="Duke Energy Logo"> Duke Energy Gateway
 
 [![GitHub Release][releases-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
@@ -11,23 +11,27 @@
 [![Project Maintenance][maintenance-shield]][user_profile]
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
-[![Discord][discord-shield]][discord]
-[![Community Forum][forum-shield]][forum]
+This is a custom integration for [Home Assistant](https://www.home-assistant.io/). It pulls near-real-time energy usage from Duke Energy via the Duke Energy Gateway pilot program.
 
-**TO BE REMOVED: If you need help, as a developper, to use this custom component tempalte,
-please look at the [User Guide in the Cookiecutter documentation](https://cookiecutter-homeassistant-custom-component.readthedocs.io/en/stable/quickstart.html)**
+This component will set up the following entities.
 
-**This component will set up the following platforms.**
+| Platform                             | Description                                                                                                                                                                                                           |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sensor.duke_energy_usage_today_kwh` | Represents today's energy consumption (from 0:00 local time to 23:59 local time, then resetting). Additional attributes are available containing the meter ID, gateway ID, and the timestamp of the last measurement. |
 
-| Platform        | Description                             |
-| --------------- | --------------------------------------- |
-| `binary_sensor` | Show something `True` or `False`.       |
-| `sensor`        | Show info from Duke Energy Gateway API. |
-| `switch`        | Switch something `True` or `False`.     |
+This integration leverages the [`pyduke-energy`](https://github.com/mjmeli/pyduke-energy) library, also written by me, to pull data. This API is _very_ unofficial and may stop working at any time (see [Disclaimer](https://github.com/mjmeli/pyduke-energy#Disclaimer)). Also, you are required to have a Duke Energy Gateway connected to your smartmeter for this to work. This integration does not support any other method of retrieving data (see [Gateway Requirement](https://github.com/mjmeli/pyduke-energy#gateway-requirement)).
 
-![example][exampleimg]
+Energy usage will be provided as _daily_ data, resetting at midnight local time. At the moment, the API appears to be limited to providing new records every 15 minutes, meaning readings could be delayed up to 15 minutes. For more information, see [limitations](https://github.com/mjmeli/pyduke-energy#limitations) in the `pyduke-energy` repo.
 
 ## Installation
+
+### HACS Installation
+
+1. Add as a Custom Repository under Settings in HACS: `mjmeli/ha-duke-energy-gateway` and choose `Integration` as the Category.
+2. Restart Home Assistant
+3. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Duke Energy Gateway"
+
+### Manual Installation
 
 1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
 2. If you do not have a `custom_components` directory (folder) there, you need to create it.
@@ -37,29 +41,18 @@ please look at the [User Guide in the Cookiecutter documentation](https://cookie
 6. Restart Home Assistant
 7. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Duke Energy Gateway"
 
-Using your HA configuration directory (folder) as a starting point you should now also have this:
-
-```text
-custom_components/duke_energy_gateway/translations/en.json
-custom_components/duke_energy_gateway/translations/fr.json
-custom_components/duke_energy_gateway/translations/nb.json
-custom_components/duke_energy_gateway/translations/sensor.en.json
-custom_components/duke_energy_gateway/translations/sensor.fr.json
-custom_components/duke_energy_gateway/translations/sensor.nb.json
-custom_components/duke_energy_gateway/translations/sensor.nb.json
-custom_components/duke_energy_gateway/__init__.py
-custom_components/duke_energy_gateway/api.py
-custom_components/duke_energy_gateway/binary_sensor.py
-custom_components/duke_energy_gateway/config_flow.py
-custom_components/duke_energy_gateway/const.py
-custom_components/duke_energy_gateway/manifest.json
-custom_components/duke_energy_gateway/sensor.py
-custom_components/duke_energy_gateway/switch.py
-```
-
 ## Configuration is done in the UI
 
-<!---->
+Configuration will be done in the UI. You will need to provide the following data:
+
+| Data       | Description                         |
+| ---------- | ----------------------------------- |
+| `email`    | Your login email to Duke Energy.    |
+| `password` | Your login password to Duke Energy. |
+
+### Meter Selection
+
+The configuration flow will automatically attempt to identify your gateway and smartmeter. Right now, only one is supported per account. The first one identified will be used. If one cannot be found, the configuration process should fail.
 
 ## Contributions are welcome!
 
