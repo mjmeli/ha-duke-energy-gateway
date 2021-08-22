@@ -1,4 +1,4 @@
-# <img height="80" src="https://github.com/mjmeli/ha-duke-energy-gateway/blob/main/icons/full_logo.png?raw=true" alt="Duke Energy Logo"> Duke Energy Gateway
+# <img height="80" src="https://github.com/mjmeli/ha-duke-energy-gateway/blob/main/assets/full_logo.png?raw=true" alt="Duke Energy Logo"> Duke Energy Gateway
 
 [![GitHub Release][releases-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
