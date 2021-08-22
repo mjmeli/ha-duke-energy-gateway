@@ -1,5 +1,5 @@
 """Sensor platform for Duke Energy Gateway."""
-from homeassistant.components.sensor import STATE_CLASS_TOTAL_INCREASING
+from homeassistant.components.sensor import STATE_CLASS_MEASUREMENT
 from homeassistant.util import dt
 from pyduke_energy.types import GatewayStatus
 from pyduke_energy.types import MeterInfo
@@ -97,7 +97,8 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity):
     @property
     def state_class(self):
         """Return the state class of the sensor"""
-        return STATE_CLASS_TOTAL_INCREASING
+        # TODO - this will need to be changed to STATE_CLASS_TOTAL_INCREASING in 2021.9
+        return STATE_CLASS_MEASUREMENT
 
     @property
     def extra_state_attributes(self):
@@ -109,5 +110,7 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity):
         attrs["last_measurement"] = dt.as_local(
             dt.utc_from_timestamp(gw_usage[-1].timestamp)
         )
+        # TODO - this will need to be removed in 2021.9
+        attrs["last_reset"] = dt.utc_from_timestamp(gw_usage[0].timestamp)
 
         return attrs
