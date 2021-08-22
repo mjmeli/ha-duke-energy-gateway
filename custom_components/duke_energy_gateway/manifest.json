@@ -7,5 +7,5 @@
   "dependencies": [],
   "config_flow": true,
   "codeowners": ["@mjmeli"],
-  "requirements": ["pyduke-energy==0.0.3"]
+  "requirements": ["pyduke-energy==0.0.4"]
 }
