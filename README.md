@@ -54,6 +54,12 @@ Configuration will be done in the UI. You will need to provide the following dat
 
 The configuration flow will automatically attempt to identify your gateway and smartmeter. Right now, only one is supported per account. The first one identified will be used. If one cannot be found, the configuration process should fail.
 
+## Development
+
+After cloning the repo, you can install dev dependencies with `pip install -r requirements_dev.txt`. Then, open Visual Studio Code with `code .` and make sure to re-open with the dev container. In VS Code, you can run the task "Run Home Assistant on the port 9123" and then access it via http://localhost:9123.
+
+Before commiting, run `pre-commit run --all-files`.
+
 ## Contributions are welcome!
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
