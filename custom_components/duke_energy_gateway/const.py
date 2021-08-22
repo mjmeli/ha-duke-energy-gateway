@@ -4,7 +4,7 @@
 NAME = "Duke Energy Gateway"
 DOMAIN = "duke_energy_gateway"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.0.0"
+VERSION = "1.0.0"
 
 ATTRIBUTION = "Data provided by Duke Energy Unofficial API"
 ISSUE_URL = "https://github.com/mjmeli/ha-duke-energy-gateway/issues"

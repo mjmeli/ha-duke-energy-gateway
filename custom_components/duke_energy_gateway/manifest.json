@@ -10,6 +10,6 @@
     "@mjmeli"
   ],
   "requirements": [
-    "pyduke-energy==0.0.2"
+    "pyduke-energy==0.0.3"
   ]
 }

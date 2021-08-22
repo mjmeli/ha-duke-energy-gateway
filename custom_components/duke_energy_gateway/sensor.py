@@ -105,6 +105,8 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity):
 
         # Currently there is only one sensor so this works. If we add more then we will need to handle this better.
         gw_usage: list[UsageMeasurement] = self.coordinator.data
-        attrs["last_measurement"] = dt.as_local(gw_usage[-1].datetime_utc)
+        attrs["last_measurement"] = dt.as_local(
+            dt.utc_from_timestamp(gw_usage[-1].timestamp)
+        )
 
         return attrs
