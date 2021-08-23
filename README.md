@@ -1,7 +1,7 @@
 # <img height="80" src="https://github.com/mjmeli/ha-duke-energy-gateway/blob/main/assets/logo.png?raw=true" alt="Duke Energy Logo"> Duke Energy Gateway
 
 [![GitHub Release][releases-shield]][releases]
-[![GitHub Build][build-shield]][releases]
+[![GitHub Build][build-shield]][build]
 [![GitHub Activity][commits-shield]][commits]
 
 [![License][license-shield]](LICENSE)
