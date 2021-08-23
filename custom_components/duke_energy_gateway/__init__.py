@@ -16,7 +16,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.util import dt
-from pyduke_energy import DukeEnergyClient
+from pyduke_energy.client import DukeEnergyClient
 
 from .const import CONF_EMAIL
 from .const import CONF_PASSWORD
@@ -51,19 +51,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     selected_meter = None
     selected_gateway = None
     account_list = await client.get_account_list()
+    _LOGGER.debug(
+        f"Accounts to check for gateway ({len(account_list)}): {','.join([a.src_acct_id for a in account_list])}"
+    )
     for account in account_list:
         try:
             _LOGGER.debug(f"Checking account {account.src_acct_id} for gateway")
-            account_details = await client.get_account_details(
-                account.src_acct_id, account.src_sys_cd
+            account_details = await client.get_account_details(account)
+            _LOGGER.debug(
+                f"Meters to check for gateway ({len(account_details.meter_infos)}): {','.join([m.serial_num for m in account_details.meter_infos])}"
             )
             for meter in account_details.meter_infos:
-                _LOGGER.debug(f"Checking meter {meter.serial_num} for gateway")
+                _LOGGER.debug(
+                    f"Checking meter {meter.serial_num} for gateway [meter_type={meter.meter_type}, is_certified_smart_meter={meter.is_certified_smart_meter}]"
+                )
                 if (
                     meter.meter_type.upper() == "ELECTRIC"
                     and meter.is_certified_smart_meter
                 ):
-                    client.select_meter(meter.serial_num, meter.agreement_active_date)
+                    client.select_meter(meter)
                     gw_status = await client.get_gateway_status()
                     if gw_status is not None:
                         _LOGGER.debug(
@@ -72,6 +78,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
                         selected_meter = meter
                         selected_gateway = gw_status
                         break
+                    else:
+                        _LOGGER.debug(f"No gateway status for meter {meter.serial_num}")
         except Exception as e:
             # Try the next account if anything fails above
             _LOGGER.debug(f"Failed to find meter on account {account.src_acct_id}: {e}")

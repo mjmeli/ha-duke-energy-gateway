@@ -3,7 +3,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
-from pyduke_energy import DukeEnergyClient
+from pyduke_energy.client import DukeEnergyClient
 
 from .const import CONF_EMAIL
 from .const import CONF_PASSWORD

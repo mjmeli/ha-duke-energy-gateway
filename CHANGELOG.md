@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.0.7] - 2021-08-23
+
+### Added
+
+- Added some more logging into the smart meter auto-identification flow
+
+### Fixed
+
+- Fixed issue with detecting smart meter when accounts have a `bpNumber` (fixes #10)
+
 ## [0.0.6] - 2021-08-23
 
 ### Fixed
@@ -51,7 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Pulls today's current energy usage into entity sensor.duke_energy_usage_today_kwh
 
-[unreleased]: https://github.com//mjmeli/ha-duke-energy-gateway/compare/0.0.6...HEAD
+[unreleased]: https://github.com//mjmeli/ha-duke-energy-gateway/compare/0.0.7...HEAD
+[0.0.7]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.7
 [0.0.6]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.6
 [0.0.5]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.5
 [0.0.4]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.4
