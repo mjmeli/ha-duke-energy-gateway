@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.0.5] - 2021-08-22
+
+### Fixed
+
+- Usage sensor not being setup with the correct unit_of_measurement (which is needed to show it in the energy dashboard).
+
 ## [0.0.4] - 2021-08-22
 
 ### Fixed

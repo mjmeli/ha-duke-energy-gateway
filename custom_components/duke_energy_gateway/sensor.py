@@ -86,6 +86,11 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity):
         return today_usage
 
     @property
+    def unit_of_measurement(self):
+        """Return the unit of measurement."""
+        return self._sensor.unit
+
+    @property
     def icon(self):
         """Return the icon of the sensor."""
         return self._sensor.icon
