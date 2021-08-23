@@ -82,7 +82,10 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity):
         """Return the state of the sensor."""
         # Currently there is only one sensor so this works. If we add more then we will need to handle this better.
         gw_usage: list[UsageMeasurement] = self.coordinator.data
-        today_usage = sum(x.usage for x in gw_usage) / 1000
+        if gw_usage and len(gw_usage) > 0:
+            today_usage = sum(x.usage for x in gw_usage) / 1000
+        else:
+            today_usage = 0
         return today_usage
 
     @property
@@ -113,10 +116,18 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity):
 
         # Currently there is only one sensor so this works. If we add more then we will need to handle this better.
         gw_usage: list[UsageMeasurement] = self.coordinator.data
-        attrs["last_measurement"] = dt.as_local(
-            dt.utc_from_timestamp(gw_usage[-1].timestamp)
-        )
-        # TODO - this will need to be removed in 2021.9
-        attrs["last_reset"] = dt.utc_from_timestamp(gw_usage[0].timestamp)
+        if gw_usage and len(gw_usage) > 0:
+            last_measurement = dt.as_local(
+                dt.utc_from_timestamp(gw_usage[-1].timestamp)
+            )
+            # TODO - this will need to be removed in 2021.9
+            last_reset = dt.utc_from_timestamp(gw_usage[0].timestamp)
+        else:
+            # If no data then it's probably the start of the day so use that as the dates
+            last_measurement = dt.start_of_local_day()
+            last_reset = dt.as_utc(dt.start_of_local_day())
+
+        attrs["last_measurement"] = last_measurement
+        attrs["last_reset"] = last_reset
 
         return attrs
