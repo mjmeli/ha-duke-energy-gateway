@@ -136,7 +136,9 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
             today_end = today_start + timedelta(days=1)
             return await self.api.get_gateway_usage(today_start, today_end)
         except Exception as exception:
-            raise UpdateFailed() from exception
+            raise UpdateFailed(
+                f"Error communicating with Duke Energy Usage API: {exception}"
+            ) from exception
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
