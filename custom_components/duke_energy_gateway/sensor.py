@@ -1,6 +1,6 @@
 """Sensor platform for Duke Energy Gateway."""
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.components.sensor import STATE_CLASS_MEASUREMENT
+from homeassistant.components.sensor import STATE_CLASS_TOTAL_INCREASING
 from homeassistant.util import dt
 from pyduke_energy.types import GatewayStatus
 from pyduke_energy.types import MeterInfo
@@ -106,8 +106,7 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity):
     @property
     def state_class(self):
         """Return the state class of the sensor"""
-        # TODO - this will need to be changed to STATE_CLASS_TOTAL_INCREASING in 2021.9
-        return STATE_CLASS_MEASUREMENT
+        return STATE_CLASS_TOTAL_INCREASING
 
     @property
     def extra_state_attributes(self):
@@ -120,14 +119,10 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity):
             last_measurement = dt.as_local(
                 dt.utc_from_timestamp(gw_usage[-1].timestamp)
             )
-            # TODO - this will need to be removed in 2021.9
-            last_reset = dt.utc_from_timestamp(gw_usage[0].timestamp)
         else:
             # If no data then it's probably the start of the day so use that as the dates
             last_measurement = dt.start_of_local_day()
-            last_reset = dt.as_utc(dt.start_of_local_day())
 
         attrs["last_measurement"] = last_measurement
-        attrs["last_reset"] = last_reset
 
         return attrs

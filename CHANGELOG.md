@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
--
+- Changed the sensor state class from `measurement` to `total_increasing` as per changes in HA 2021.9 (see #11)
 
 ## [0.0.7] - 2021-08-23
 
