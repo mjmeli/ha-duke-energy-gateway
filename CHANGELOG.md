@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.0.9] - 2021-09-08
+
+### Fixed
+
+- Handle API failures on invalid meters (fixes #16)
+
 ## [0.0.8] - 2021-09-01
 
 ### Added
@@ -71,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Pulls today's current energy usage into entity sensor.duke_energy_usage_today_kwh
 
-[unreleased]: https://github.com//mjmeli/ha-duke-energy-gateway/compare/0.0.8...HEAD
+[unreleased]: https://github.com//mjmeli/ha-duke-energy-gateway/compare/0.0.9...HEAD
+[0.0.9]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.9
 [0.0.8]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.8
 [0.0.7]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.7
 [0.0.6]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.6

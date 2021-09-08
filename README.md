@@ -57,7 +57,9 @@ The configuration flow will automatically attempt to identify your gateway and s
 
 ## Development
 
-After cloning the repo, you can install dev dependencies with `pip install -r requirements_dev.txt`. Then, open Visual Studio Code with `code .` and make sure to re-open with the dev container. In VS Code, you can run the task "Run Home Assistant on the port 9123" and then access it via http://localhost:9123.
+I suggest using the dev container for development by opening in Visual Studio Code with `code .` and clicking on the option to re-open with dev container. In VS Code, you can run the task "Run Home Assistant on the port 9123" and then access it via http://localhost:9123.
+
+If you want to install manually, you can install dev dependencies with `pip install -r requirements_dev.txt`.
 
 Before commiting, run `pre-commit run --all-files`.
 

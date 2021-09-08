@@ -4,7 +4,7 @@
   "name": "Duke Energy Gateway integration development",
   "context": "..",
   "appPort": ["9123:8123"],
-  "postCreateCommand": "container install",
+  "postCreateCommand": "pip install -r requirements_dev.txt && container install",
   "extensions": [
     "ms-python.python",
     "github.vscode-pull-request-github",
