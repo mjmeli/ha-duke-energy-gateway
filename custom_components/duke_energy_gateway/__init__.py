@@ -47,9 +47,41 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     client = DukeEnergyClient(email, password, session)
     _LOGGER.debug("Setup Duke Energy API client")
 
-    # Find the meter that is used for the gateway
-    selected_meter = None
-    selected_gateway = None
+    # Try to find the meter that is used for the gateway
+    selected_meter, selected_gateway = await find_meter_with_gateway(client)
+
+    # If no meter was found, we raise an error
+    if not selected_meter or not selected_gateway:
+        _LOGGER.error(
+            "Could not identify a smart meter on your account with gateway access."
+        )
+        return False
+
+    coordinator = DukeEnergyGatewayUsageDataUpdateCoordinator(hass, client=client)
+    await coordinator.async_refresh()
+
+    if not coordinator.last_update_success:
+        raise ConfigEntryNotReady
+
+    hass.data[DOMAIN][entry.entry_id] = {
+        "coordinator": coordinator,
+        "meter": selected_meter,
+        "gateway": selected_gateway,
+    }
+
+    for platform in PLATFORMS:
+        if entry.options.get(platform, True):
+            coordinator.platforms.append(platform)
+            hass.async_add_job(
+                hass.config_entries.async_forward_entry_setup(entry, platform)
+            )
+
+    entry.add_update_listener(async_reload_entry)
+    return True
+
+
+async def find_meter_with_gateway(client: DukeEnergyClient):
+    """Find the meter that is used for the gateway by iterating through the accounts and meters."""
     account_list = await client.get_account_list()
     account_numbers_text = ",".join([f"'{a.src_acct_id}'" for a in account_list])
     _LOGGER.debug(
@@ -82,9 +114,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
                             _LOGGER.debug(
                                 f"Found meter '{meter.serial_num}' with gateway '{gw_status.id}'"
                             )
-                            selected_meter = meter
-                            selected_gateway = gw_status
-                            break
+                            return meter, gw_status
                         else:
                             _LOGGER.debug(
                                 f"No gateway status for meter '{meter.serial_num}'"
@@ -101,35 +131,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
                 f"Failed to find meter on account '{account.src_acct_id}': {e}"
             )
             pass
-
-    # If no meter was found, we raise an error
-    if not selected_meter:
-        _LOGGER.error(
-            "Could not identify a smart meter on your account with gateway access."
-        )
-        return False
-
-    coordinator = DukeEnergyGatewayUsageDataUpdateCoordinator(hass, client=client)
-    await coordinator.async_refresh()
-
-    if not coordinator.last_update_success:
-        raise ConfigEntryNotReady
-
-    hass.data[DOMAIN][entry.entry_id] = {
-        "coordinator": coordinator,
-        "meter": selected_meter,
-        "gateway": selected_gateway,
-    }
-
-    for platform in PLATFORMS:
-        if entry.options.get(platform, True):
-            coordinator.platforms.append(platform)
-            hass.async_add_job(
-                hass.config_entries.async_forward_entry_setup(entry, platform)
-            )
-
-    entry.add_update_listener(async_reload_entry)
-    return True
+    return None, None
 
 
 class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
