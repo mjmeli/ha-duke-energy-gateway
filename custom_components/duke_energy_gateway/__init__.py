@@ -44,63 +44,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     password = entry.data.get(CONF_PASSWORD)
 
     session = async_get_clientsession(hass)
-    client = DukeEnergyClient(email, password, session)
+    client = DukeEnergyClient(email, password, session, _LOGGER)
     _LOGGER.debug("Setup Duke Energy API client")
 
     # Find the meter that is used for the gateway
-    selected_meter = None
-    selected_gateway = None
-    account_list = await client.get_account_list()
-    account_numbers_text = ",".join([f"'{a.src_acct_id}'" for a in account_list])
-    _LOGGER.debug(
-        f"Accounts to check for gateway ({len(account_list)}): {account_numbers_text}"
-    )
-    for account in account_list:
-        try:
-            _LOGGER.debug(f"Checking account '{account.src_acct_id}' for gateway")
-            account_details = await client.get_account_details(account)
-            serial_numbers_text = ",".join(
-                [f"'{m.serial_num}'" for m in account_details.meter_infos]
-            )
-            _LOGGER.debug(
-                f"Meters to check for gateway ({len(account_details.meter_infos)}): {serial_numbers_text}"
-            )
-            for meter in account_details.meter_infos:
-                try:
-                    _LOGGER.debug(
-                        f"Checking meter '{meter.serial_num}' for gateway [meter_type={meter.meter_type}, is_certified_smart_meter={meter.is_certified_smart_meter}]"
-                    )
-                    if (
-                        meter.serial_num
-                        and meter.meter_type.upper()  # sometimes blank meters show up
-                        == "ELECTRIC"
-                        and meter.is_certified_smart_meter
-                    ):
-                        client.select_meter(meter)
-                        gw_status = await client.get_gateway_status()
-                        if gw_status is not None:
-                            _LOGGER.debug(
-                                f"Found meter '{meter.serial_num}' with gateway '{gw_status.id}'"
-                            )
-                            selected_meter = meter
-                            selected_gateway = gw_status
-                            break
-                        else:
-                            _LOGGER.debug(
-                                f"No gateway status for meter '{meter.serial_num}'"
-                            )
-                except Exception as e:
-                    # Try the next meter if anything fails above
-                    _LOGGER.debug(
-                        f"Failed to check meter '{meter.serial_num}' on account '{account.src_acct_id}': {e}"
-                    )
-                    pass
-        except Exception as e:
-            # Try the next account if anything fails above
-            _LOGGER.debug(
-                f"Failed to find meter on account '{account.src_acct_id}': {e}"
-            )
-            pass
+    selected_meter, selected_gateway = await client.select_default_meter()
 
     # If no meter was found, we raise an error
     if not selected_meter:
