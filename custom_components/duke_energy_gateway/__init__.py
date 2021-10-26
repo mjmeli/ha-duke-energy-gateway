@@ -98,7 +98,7 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         realtime: DukeEnergyRealtime,
     ) -> None:
         """Initialize."""
-        self.api = client
+        self.client = client
         self.realtime = realtime
         self.platforms = []
 
@@ -109,7 +109,7 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             today_start = dt.start_of_local_day()
             today_end = today_start + timedelta(days=1)
-            return await self.api.get_gateway_usage(today_start, today_end)
+            return await self.client.get_gateway_usage(today_start, today_end)
         except Exception as exception:
             raise UpdateFailed(
                 f"Error communicating with Duke Energy Usage API: {exception}"
@@ -121,9 +121,10 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
             self.realtime.on_msg = self._realtime_on_msg
             asyncio.create_task(self.realtime.connect_and_subscribe())
             _LOGGER.debug("Pushed real-time connect/subscribe to async task")
-        except Exception as ex:
+        except Exception as exception:
             _LOGGER.error(
-                "Failure trying to connect and subscribe to real-time usage: %s", ex
+                "Failure trying to connect and subscribe to real-time usage: %s",
+                exception,
             )
             raise
 
@@ -136,8 +137,12 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
                 measurement.timestamp,
                 measurement.usage,
             )
-        except (ValueError, TypeError):
-            _LOGGER.warning("Unexpected message: %s", msg.payload.decode("utf8"))
+        except (ValueError, TypeError) as exception:
+            _LOGGER.error(
+                "Error while parsing real-time usage message: %s [Message='%s']",
+                exception,
+                msg.payload.decode("utf8"),
+            )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
