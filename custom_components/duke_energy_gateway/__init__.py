@@ -17,6 +17,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.util import dt
 from pyduke_energy.client import DukeEnergyClient
+from pyduke_energy.realtime import DukeEnergyRealtime
 
 from .const import CONF_EMAIL
 from .const import CONF_PASSWORD
@@ -44,8 +45,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     password = entry.data.get(CONF_PASSWORD)
 
     session = async_get_clientsession(hass)
-    client = DukeEnergyClient(email, password, session, _LOGGER)
-    _LOGGER.debug("Setup Duke Energy API client")
+    client = DukeEnergyClient(email, password, session)
+    realtime = DukeEnergyRealtime(client)
+    _LOGGER.debug("Setup Duke Energy API clients")
 
     # Find the meter that is used for the gateway
     selected_meter, selected_gateway = await client.select_default_meter()
@@ -57,11 +59,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         )
         return False
 
-    coordinator = DukeEnergyGatewayUsageDataUpdateCoordinator(hass, client=client)
+    coordinator = DukeEnergyGatewayUsageDataUpdateCoordinator(
+        hass, client=client, realtime=realtime
+    )
     await coordinator.async_refresh()
 
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
+
+    # Initialize the real-time data stream
+    coordinator.realtime_initialize()
+    _LOGGER.debug("Setup Duke Energy API realtime client")
 
     hass.data[DOMAIN][entry.entry_id] = {
         "coordinator": coordinator,
@@ -87,9 +95,11 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         self,
         hass: HomeAssistant,
         client: DukeEnergyClient,
+        realtime: DukeEnergyRealtime,
     ) -> None:
         """Initialize."""
         self.api = client
+        self.realtime = realtime
         self.platforms = []
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
@@ -104,6 +114,30 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
             raise UpdateFailed(
                 f"Error communicating with Duke Energy Usage API: {exception}"
             ) from exception
+
+    def realtime_initialize(self):
+        """Setup callbacks, connect, and subscribe to the real-time usage MQTT stream."""
+        try:
+            self.realtime.on_msg = self._realtime_on_msg
+            asyncio.create_task(self.realtime.connect_and_subscribe())
+            _LOGGER.debug("Pushed real-time connect/subscribe to async task")
+        except Exception as ex:
+            _LOGGER.error(
+                "Failure trying to connect and subscribe to real-time usage: %s", ex
+            )
+            raise
+
+    def _realtime_on_msg(self, msg):
+        """Handler for the real-time usage MQTT messages."""
+        try:
+            measurement = self.realtime.msg_to_usage_measurement(msg)
+            _LOGGER.debug(
+                "Realtime measurement: %d = %f",
+                measurement.timestamp,
+                measurement.usage,
+            )
+        except (ValueError, TypeError):
+            _LOGGER.warning("Unexpected message: %s", msg.payload.decode("utf8"))
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
