@@ -7,19 +7,22 @@ https://github.com/mjmeli/ha-duke-energy-gateway
 import asyncio
 import logging
 from datetime import timedelta
+from typing import Any, Callable
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Config
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.dispatcher import async_dispatcher_connect, dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.util import dt
 from pyduke_energy.client import DukeEnergyClient
 from pyduke_energy.realtime import DukeEnergyRealtime
+from pyduke_energy.types import RealtimeUsageMeasurement
 
-from .const import CONF_EMAIL
+from .const import CONF_EMAIL, REALTIME_DISPATCH_SIGNAL
 from .const import CONF_PASSWORD
 from .const import DOMAIN
 from .const import PLATFORMS
@@ -68,7 +71,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         raise ConfigEntryNotReady
 
     # Initialize the real-time data stream
-    coordinator.realtime_initialize()
+    # coordinator.realtime_initialize()
     _LOGGER.debug("Setup Duke Energy API realtime client")
 
     hass.data[DOMAIN][entry.entry_id] = {
@@ -128,15 +131,18 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
             )
             raise
 
+    async def async_realtime_subscribe(
+        self, target: Callable[[RealtimeUsageMeasurement], Any]
+    ):
+        """Setup a subscriber to receive new real-time measurements."""
+        await async_dispatcher_connect(self.hass, REALTIME_DISPATCH_SIGNAL, target)
+
     def _realtime_on_msg(self, msg):
         """Handler for the real-time usage MQTT messages."""
         try:
             measurement = self.realtime.msg_to_usage_measurement(msg)
-            _LOGGER.debug(
-                "Realtime measurement: %d = %f",
-                measurement.timestamp,
-                measurement.usage,
-            )
+            if measurement:
+                dispatcher_send(self.hass, REALTIME_DISPATCH_SIGNAL, measurement)
         except (ValueError, TypeError) as exception:
             _LOGGER.error(
                 "Error while parsing real-time usage message: %s [Message='%s']",

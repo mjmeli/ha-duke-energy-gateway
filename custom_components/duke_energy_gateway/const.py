@@ -20,6 +20,8 @@ CONF_PASSWORD = "password"
 # Defaults
 DEFAULT_NAME = DOMAIN
 
+REALTIME_DISPATCH_SIGNAL = f"{DOMAIN}_realtime_dispatch_signal"
+
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
 {NAME}
