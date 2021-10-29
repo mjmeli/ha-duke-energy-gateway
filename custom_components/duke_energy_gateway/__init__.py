@@ -6,6 +6,7 @@ https://github.com/mjmeli/ha-duke-energy-gateway
 """
 import asyncio
 import logging
+from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Config
@@ -17,6 +18,8 @@ from pyduke_energy.realtime import DukeEnergyRealtime
 
 from .const import CONF_EMAIL
 from .const import CONF_PASSWORD
+from .const import CONF_REALTIME_INTERVAL
+from .const import CONF_REALTIME_INTERVAL_DEFAULT_SEC
 from .const import DOMAIN
 from .const import PLATFORMS
 from .const import STARTUP_MESSAGE
@@ -38,9 +41,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     email = entry.data.get(CONF_EMAIL)
     password = entry.data.get(CONF_PASSWORD)
-    # realtime_interval = entry.options.get(
-    #     CONF_REALTIME_INTERVAL, CONF_REALTIME_INTERVAL_DEFAULT_SEC
-    # )
+    realtime_interval = entry.options.get(
+        CONF_REALTIME_INTERVAL, CONF_REALTIME_INTERVAL_DEFAULT_SEC
+    )
 
     session = async_get_clientsession(hass)
     client = DukeEnergyClient(email, password, session)
@@ -58,7 +61,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         return False
 
     coordinator = DukeEnergyGatewayUsageDataUpdateCoordinator(
-        hass, client=client, realtime=realtime
+        hass,
+        client=client,
+        realtime=realtime,
+        realtime_interval=timedelta(seconds=realtime_interval),
     )
     await coordinator.async_refresh()
 

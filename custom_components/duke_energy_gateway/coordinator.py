@@ -1,6 +1,8 @@
 """Data update coordinator for Duke Energy Gateway entities."""
 import asyncio
 import logging
+from asyncio.tasks import Task
+from datetime import datetime
 from datetime import timedelta
 from typing import Any
 from typing import Callable
@@ -31,13 +33,18 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         hass: HomeAssistant,
         client: DukeEnergyClient,
         realtime: DukeEnergyRealtime,
+        realtime_interval: timedelta,
     ) -> None:
         """Initialize."""
         self.client = client
         self.realtime = realtime
+        self.realtime_interval = realtime_interval
+        self.realtime_next_send = datetime.utcnow()
+        self.realtime_task: Task = None
+        self.async_realtime_remove_subscriber_funcs_by_source: dict[
+            str, Callable[[], None]
+        ] = {}
         self.platforms = []
-        self.realtime_task = None
-        self.async_remove_subscriber_funcs_by_source = {}
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
 
@@ -78,14 +85,28 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         """Handler for the real-time usage MQTT messages."""
         try:
             measurement = self.realtime.msg_to_usage_measurement(msg)
-            if measurement:
-                dispatcher_send(self.hass, REALTIME_DISPATCH_SIGNAL, measurement)
         except (ValueError, TypeError) as exception:
             _LOGGER.error(
                 "Error while parsing real-time usage message: %s [Message='%s']",
                 exception,
                 msg.payload.decode("utf8"),
             )
+            return
+
+        if measurement:
+            # Throttle sending calls to reduce amount of data bneing produced.
+            should_send = (
+                self.realtime_interval is None
+                or self.realtime_next_send is None
+                or datetime.utcnow() >= self.realtime_next_send
+            )
+            if should_send:
+                self.realtime_next_send = datetime.utcnow() + self.realtime_interval
+                dispatcher_send(self.hass, REALTIME_DISPATCH_SIGNAL, measurement)
+            else:
+                _LOGGER.debug(
+                    "Ignoring real-time update as still in throttling interval"
+                )
 
     def async_realtime_subscribe_to_dispatcher(
         self, source: str, target: Callable[[RealtimeUsageMeasurement], Any]
@@ -95,11 +116,13 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
             self.hass, REALTIME_DISPATCH_SIGNAL, target
         )
         _LOGGER.debug("Subscribed target for %s to dispatcher", source)
-        self.async_remove_subscriber_funcs_by_source[source] = remove_subscriber
+        self.async_realtime_remove_subscriber_funcs_by_source[
+            source
+        ] = remove_subscriber
 
     def async_realtime_unsubscribe_from_dispatcher(self, source: str):
         """Remove a subscriber from the dispatch."""
-        if source in self.async_remove_subscriber_funcs_by_source:
+        if source in self.async_realtime_remove_subscriber_funcs_by_source:
             _LOGGER.debug("Removing subscribers to dispatcher for %s", source)
-            self.async_remove_subscriber_funcs_by_source[source]()
-            self.async_remove_subscriber_funcs_by_source[source] = None
+            self.async_realtime_remove_subscriber_funcs_by_source[source]()
+            self.async_realtime_remove_subscriber_funcs_by_source[source] = None
