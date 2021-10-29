@@ -6,6 +6,7 @@ https://github.com/mjmeli/ha-duke-energy-gateway
 """
 import asyncio
 import logging
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Config
 from homeassistant.core import HomeAssistant
@@ -14,7 +15,11 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from pyduke_energy.client import DukeEnergyClient
 from pyduke_energy.realtime import DukeEnergyRealtime
 
-from .const import CONF_EMAIL, CONF_PASSWORD, DOMAIN, PLATFORMS, STARTUP_MESSAGE
+from .const import CONF_EMAIL
+from .const import CONF_PASSWORD
+from .const import DOMAIN
+from .const import PLATFORMS
+from .const import STARTUP_MESSAGE
 from .coordinator import DukeEnergyGatewayUsageDataUpdateCoordinator
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)

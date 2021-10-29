@@ -1,20 +1,18 @@
 """Sensor platform for Duke Energy Gateway."""
-from abc import ABC, abstractstaticmethod
-from dataclasses import dataclass
 import logging
-from homeassistant.components.sensor import (
-    STATE_CLASS_TOTAL_INCREASING,
-    STATE_CLASS_MEASUREMENT,
-    SensorEntity,
-)
+from abc import ABC
+from abc import abstractstaticmethod
+from dataclasses import dataclass
+
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import STATE_CLASS_MEASUREMENT
+from homeassistant.components.sensor import STATE_CLASS_TOTAL_INCREASING
 from homeassistant.helpers import device_registry
 from homeassistant.util import dt
-from pyduke_energy.types import (
-    GatewayStatus,
-    MeterInfo,
-    RealtimeUsageMeasurement,
-    UsageMeasurement,
-)
+from pyduke_energy.types import GatewayStatus
+from pyduke_energy.types import MeterInfo
+from pyduke_energy.types import RealtimeUsageMeasurement
+from pyduke_energy.types import UsageMeasurement
 
 from .const import DOMAIN
 from .entity import DukeEnergyGatewayEntity

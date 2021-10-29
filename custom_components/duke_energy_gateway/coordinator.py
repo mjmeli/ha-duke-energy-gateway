@@ -1,11 +1,16 @@
 """Data update coordinator for Duke Energy Gateway entities."""
 import asyncio
-from datetime import timedelta
 import logging
-from typing import Any, Callable
-from homeassistant.core import DOMAIN, HomeAssistant
-from homeassistant.helpers.dispatcher import dispatcher_connect, dispatcher_send
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from datetime import timedelta
+from typing import Any
+from typing import Callable
+
+from homeassistant.core import DOMAIN
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.dispatcher import dispatcher_connect
+from homeassistant.helpers.dispatcher import dispatcher_send
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.util import dt
 from pyduke_energy.client import DukeEnergyClient
 from pyduke_energy.realtime import DukeEnergyRealtime
