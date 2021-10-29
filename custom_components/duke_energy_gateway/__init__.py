@@ -90,7 +90,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Handle removal of an entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator = hass.data[DOMAIN][
+        entry.entry_id
+    ]["coordinator"]
 
     unloaded = all(
         await asyncio.gather(
@@ -103,6 +105,11 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     if unloaded:
         hass.data[DOMAIN].pop(entry.entry_id)
+
+    # Cleanup real-time stream if it wasn't already done so
+    _LOGGER.debug("Checking for clean-up of real-time stream in async_unload_entry")
+    coordinator.realtime_cancel()
+    coordinator.async_realtime_unsubscribe_all_from_dispatcher()
 
     return unloaded
 

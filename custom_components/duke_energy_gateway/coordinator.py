@@ -112,13 +112,19 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         self, source: str, target: Callable[[RealtimeUsageMeasurement], Any]
     ):
         """Setup a subscriber to receive new real-time measurements."""
-        remove_subscriber = async_dispatcher_connect(
-            self.hass, REALTIME_DISPATCH_SIGNAL, target
-        )
-        _LOGGER.debug("Subscribed target for %s to dispatcher", source)
+        # If this source is already subscribed, re-use the existing one
+        if source in self.async_realtime_remove_subscriber_funcs_by_source:
+            _LOGGER.warning(
+                "Attempting to subscribe to dispatcher by source that is already subscribed: %s",
+                source,
+            )
+            return
+
+        # Connect function returns a function that removes the subscription. Save for later.
         self.async_realtime_remove_subscriber_funcs_by_source[
             source
-        ] = remove_subscriber
+        ] = async_dispatcher_connect(self.hass, REALTIME_DISPATCH_SIGNAL, target)
+        _LOGGER.debug("Subscribed target for %s to dispatcher", source)
 
     def async_realtime_unsubscribe_from_dispatcher(self, source: str):
         """Remove a subscriber from the dispatch."""
@@ -126,3 +132,9 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.debug("Removing subscribers to dispatcher for %s", source)
             self.async_realtime_remove_subscriber_funcs_by_source[source]()
             self.async_realtime_remove_subscriber_funcs_by_source[source] = None
+
+    def async_realtime_unsubscribe_all_from_dispatcher(self):
+        """Remove all subscribers from the dispatch."""
+        sources = self.async_realtime_remove_subscriber_funcs_by_source.keys()
+        for source in sources:
+            self.async_realtime_unsubscribe_from_dispatcher(source)
