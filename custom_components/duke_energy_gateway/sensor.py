@@ -1,7 +1,6 @@
 """Sensor platform for Duke Energy Gateway."""
 import logging
-from abc import ABC
-from abc import abstractstaticmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import SensorEntity
@@ -72,6 +71,7 @@ class _SensorMetadata:
     icon: str
     device_class: str
     state_class: str
+    should_poll: bool
 
 
 class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity, ABC):
@@ -95,7 +95,8 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity, ABC):
             gateway,
         )
 
-    @abstractstaticmethod
+    @staticmethod
+    @abstractmethod
     def get_sensor_metadata() -> _SensorMetadata:
         """Get the sensor metadata for this sensor. Override in base class."""
         return None
@@ -107,8 +108,16 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity, ABC):
 
     @property
     def state(self):
-        """Bt default, current state is stored in the _state instance variable."""
+        """By default, current state is stored in the _state instance variable."""
+        self.update()
         return self._state
+
+    def update(self):
+        """Override this to update the _state instance variable for a state update."""
+
+    @property
+    def should_poll(self) -> bool:
+        return self._sensor_metadata.should_poll
 
     @property
     def unit_of_measurement(self):
@@ -141,10 +150,10 @@ class _TotalUsageTodaySensor(DukeEnergyGatewaySensor):
             "mdi:flash",
             "energy",
             STATE_CLASS_TOTAL_INCREASING,
+            True,
         )
 
-    @property
-    def state(self):
+    def update(self):
         """Return today's usage by summing all measurements."""
         gw_usage: list[UsageMeasurement] = self._coordinator.data
         if gw_usage and len(gw_usage) > 0:
@@ -152,7 +161,6 @@ class _TotalUsageTodaySensor(DukeEnergyGatewaySensor):
         else:
             today_usage = 0
         self._state = today_usage
-        return self._state
 
     @property
     def extra_state_attributes(self):
@@ -182,11 +190,8 @@ class _RealtimeUsageSensor(DukeEnergyGatewaySensor):
             "mdi:flash",
             "power",
             STATE_CLASS_MEASUREMENT,
+            False,
         )
-
-    @property
-    def should_poll(self) -> bool:
-        return False
 
     async def async_added_to_hass(self):
         """Subscribe to updates."""
