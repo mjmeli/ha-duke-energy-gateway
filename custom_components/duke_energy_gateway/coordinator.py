@@ -36,6 +36,7 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         self.client = client
         self.realtime = realtime
         self.platforms = []
+        self.realtime_task = None
         self.async_remove_subscriber_funcs_by_source = {}
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
@@ -55,14 +56,23 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         """Setup callbacks, connect, and subscribe to the real-time usage MQTT stream."""
         try:
             self.realtime.on_msg = self._realtime_on_msg
-            asyncio.create_task(self.realtime.connect_and_subscribe())
-            _LOGGER.debug("Pushed real-time connect/subscribe to async task")
+            self.realtime_task = asyncio.create_task(
+                self.realtime.connect_and_subscribe()
+            )
+            _LOGGER.debug("Triggered real-time connect/subscribe async task")
         except Exception as exception:
             _LOGGER.error(
                 "Failure trying to connect and subscribe to real-time usage: %s",
                 exception,
             )
             raise
+
+    def realtime_cancel(self):
+        """Cancel the real-time usage MQTT stream, which will unsubscribe."""
+        if self.realtime_task:
+            self.realtime_task.cancel()
+            self.realtime_task = None
+            _LOGGER.debug("Cancelled real-time async task")
 
     def _realtime_on_msg(self, msg):
         """Handler for the real-time usage MQTT messages."""
@@ -89,6 +99,7 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
 
     def async_realtime_unsubscribe_from_dispatcher(self, source: str):
         """Remove a subscriber from the dispatch."""
-        if source in self.self.async_remove_subscriber_funcs_by_source:
+        if source in self.async_remove_subscriber_funcs_by_source:
             _LOGGER.debug("Removing subscribers to dispatcher for %s", source)
-            self.self.async_remove_subscriber_funcs_by_source[source]()
+            self.async_remove_subscriber_funcs_by_source[source]()
+            self.async_remove_subscriber_funcs_by_source[source] = None

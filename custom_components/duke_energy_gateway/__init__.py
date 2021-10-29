@@ -62,10 +62,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    # Initialize the real-time data stream
-    coordinator.realtime_initialize()
-    _LOGGER.debug("Setup Duke Energy API realtime client")
-
     hass.data[DOMAIN][entry.entry_id] = {
         "coordinator": coordinator,
         "meter": selected_meter,

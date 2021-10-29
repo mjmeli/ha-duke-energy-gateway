@@ -15,6 +15,7 @@ from pyduke_energy.types import RealtimeUsageMeasurement
 from pyduke_energy.types import UsageMeasurement
 
 from .const import DOMAIN
+from .coordinator import DukeEnergyGatewayUsageDataUpdateCoordinator
 from .entity import DukeEnergyGatewayEntity
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
@@ -78,7 +79,7 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity, ABC):
 
     def __init__(
         self,
-        coordinator,
+        coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator,
         entry,
         meter: MeterInfo,
         gateway: GatewayStatus,
@@ -140,7 +141,7 @@ class _TotalUsageTodaySensor(DukeEnergyGatewaySensor):
     @property
     def state(self):
         """Return today's usage by summing all measurements."""
-        gw_usage: list[UsageMeasurement] = self.coordinator.data
+        gw_usage: list[UsageMeasurement] = self._coordinator.data
         if gw_usage and len(gw_usage) > 0:
             today_usage = sum(x.usage for x in gw_usage) / 1000
         else:
@@ -153,7 +154,7 @@ class _TotalUsageTodaySensor(DukeEnergyGatewaySensor):
         """Record the timestamp of the last measurement into state attributes."""
         attrs = super().extra_state_attributes
 
-        gw_usage: list[UsageMeasurement] = self.coordinator.data
+        gw_usage: list[UsageMeasurement] = self._coordinator.data
         if gw_usage and len(gw_usage) > 0:
             last_measurement = dt.as_local(
                 dt.utc_from_timestamp(gw_usage[-1].timestamp)
@@ -189,18 +190,26 @@ class _RealtimeUsageSensor(DukeEnergyGatewaySensor):
 
     async def async_added_to_hass(self):
         """Subscribe to updates."""
-
+        # Setup subscriber callback
         async def async_on_new_measurement(measurement: RealtimeUsageMeasurement):
             _LOGGER.debug("New measurement received: %f", measurement.usage)
             self._state = measurement.usage
             await self.async_update_ha_state()
 
-        self.coordinator.async_realtime_subscribe_to_dispatcher(
+        # Attach subscriber callback
+        self._coordinator.async_realtime_subscribe_to_dispatcher(
             _RealtimeUsageSensor.__name__, async_on_new_measurement
         )
 
+        # Initialize the real-time data stream
+        self._coordinator.realtime_initialize()
+
     async def async_will_remove_from_hass(self):
         """Undo subscription."""
-        self.coordinator.async_realtime_unsubscribe_from_dispatcher(
+        # Cancel the real-time data stream task
+        self._coordinator.realtime_cancel()
+
+        # Remove subscriber callback
+        self._coordinator.async_realtime_unsubscribe_from_dispatcher(
             _RealtimeUsageSensor.__name__
         )
