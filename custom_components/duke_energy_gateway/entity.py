@@ -7,18 +7,20 @@ from .const import ATTRIBUTION
 from .const import DOMAIN
 from .const import NAME
 from .const import VERSION
+from .coordinator import DukeEnergyGatewayUsageDataUpdateCoordinator
 
 
 class DukeEnergyGatewayEntity(CoordinatorEntity):
     def __init__(
         self,
-        coordinator,
+        coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator,
         config_entry,
         entity_id: str,
         meter: MeterInfo,
         gateway: GatewayStatus,
     ):
         super().__init__(coordinator)
+        self._coordinator = coordinator
         self._config_entry = config_entry
         self._entity_id = entity_id
         self._meter = meter
@@ -32,7 +34,7 @@ class DukeEnergyGatewayEntity(CoordinatorEntity):
     @property
     def device_info(self):
         return {
-            "identifiers": {(DOMAIN, self.unique_id)},
+            "identifiers": {(DOMAIN, self._gateway.id)},
             "name": f"{NAME} {self._gateway.id}",
             "model": VERSION,
             "manufacturer": NAME,

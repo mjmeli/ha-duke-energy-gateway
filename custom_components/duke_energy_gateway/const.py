@@ -16,9 +16,13 @@ PLATFORMS = [SENSOR]
 CONF_ENABLED = "enabled"
 CONF_EMAIL = "email"
 CONF_PASSWORD = "password"
+CONF_REALTIME_INTERVAL = "realtimeInterval"
+CONF_REALTIME_INTERVAL_DEFAULT_SEC = 10
 
 # Defaults
 DEFAULT_NAME = DOMAIN
+
+REALTIME_DISPATCH_SIGNAL = f"{DOMAIN}_realtime_dispatch_signal"
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------

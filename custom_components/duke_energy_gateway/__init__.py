@@ -13,23 +13,22 @@ from homeassistant.core import Config
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.helpers.update_coordinator import UpdateFailed
-from homeassistant.util import dt
 from pyduke_energy.client import DukeEnergyClient
+from pyduke_energy.realtime import DukeEnergyRealtime
 
 from .const import CONF_EMAIL
 from .const import CONF_PASSWORD
+from .const import CONF_REALTIME_INTERVAL
+from .const import CONF_REALTIME_INTERVAL_DEFAULT_SEC
 from .const import DOMAIN
 from .const import PLATFORMS
 from .const import STARTUP_MESSAGE
-
-SCAN_INTERVAL = timedelta(seconds=60)
+from .coordinator import DukeEnergyGatewayUsageDataUpdateCoordinator
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
-async def async_setup(hass: HomeAssistant, config: Config):
+async def async_setup(_hass: HomeAssistant, _config: Config):
     """Set up this integration using YAML is not supported."""
     return True
 
@@ -42,10 +41,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     email = entry.data.get(CONF_EMAIL)
     password = entry.data.get(CONF_PASSWORD)
+    realtime_interval = entry.options.get(
+        CONF_REALTIME_INTERVAL, CONF_REALTIME_INTERVAL_DEFAULT_SEC
+    )
 
     session = async_get_clientsession(hass)
-    client = DukeEnergyClient(email, password, session, _LOGGER)
-    _LOGGER.debug("Setup Duke Energy API client")
+    client = DukeEnergyClient(email, password, session)
+    realtime = DukeEnergyRealtime(client)
+    _LOGGER.debug("Set up Duke Energy API clients")
 
     # Find the meter that is used for the gateway
     selected_meter, selected_gateway = await client.select_default_meter()
@@ -57,7 +60,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         )
         return False
 
-    coordinator = DukeEnergyGatewayUsageDataUpdateCoordinator(hass, client=client)
+    coordinator = DukeEnergyGatewayUsageDataUpdateCoordinator(
+        hass,
+        client=client,
+        realtime=realtime,
+        realtime_interval=timedelta(seconds=realtime_interval),
+    )
     await coordinator.async_refresh()
 
     if not coordinator.last_update_success:
@@ -80,35 +88,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     return True
 
 
-class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
-    """Class to manage fetching usage data from the API."""
-
-    def __init__(
-        self,
-        hass: HomeAssistant,
-        client: DukeEnergyClient,
-    ) -> None:
-        """Initialize."""
-        self.api = client
-        self.platforms = []
-
-        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
-
-    async def _async_update_data(self):
-        """Update data via library to get last day of minute-by-minute usage data."""
-        try:
-            today_start = dt.start_of_local_day()
-            today_end = today_start + timedelta(days=1)
-            return await self.api.get_gateway_usage(today_start, today_end)
-        except Exception as exception:
-            raise UpdateFailed(
-                f"Error communicating with Duke Energy Usage API: {exception}"
-            ) from exception
-
-
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Handle removal of an entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator = hass.data[DOMAIN][
+        entry.entry_id
+    ]["coordinator"]
+
     unloaded = all(
         await asyncio.gather(
             *[
@@ -120,6 +105,11 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     if unloaded:
         hass.data[DOMAIN].pop(entry.entry_id)
+
+    # Cleanup real-time stream if it wasn't already done so (it should already be done by the sensor entity)
+    _LOGGER.debug("Checking for clean-up of real-time stream in async_unload_entry")
+    coordinator.realtime_cancel()
+    coordinator.async_realtime_unsubscribe_all_from_dispatcher()
 
     return unloaded
 
