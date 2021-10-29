@@ -106,6 +106,11 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity, ABC):
         return f"Duke Energy {self._sensor_metadata.name}"
 
     @property
+    def state(self):
+        """Bt default, current state is stored in the _state instance variable."""
+        return self._state
+
+    @property
     def unit_of_measurement(self):
         """Return the unit of measurement."""
         return self._sensor_metadata.unit
@@ -182,11 +187,6 @@ class _RealtimeUsageSensor(DukeEnergyGatewaySensor):
     @property
     def should_poll(self) -> bool:
         return False
-
-    @property
-    def state(self):
-        """Current state is stored in the _state instance variable."""
-        return self._state
 
     async def async_added_to_hass(self):
         """Subscribe to updates."""
