@@ -85,12 +85,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Handle removal of an entry."""
-    coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator = hass.data[DOMAIN][
-        entry.entry_id
-    ]["coordinator"]
-
-    # Remove any subscribers to the dispatch
-    coordinator.async_realtime_remove_subscribers_to_dispatcher()
+    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
 
     unloaded = all(
         await asyncio.gather(

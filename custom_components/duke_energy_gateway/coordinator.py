@@ -36,7 +36,7 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         self.client = client
         self.realtime = realtime
         self.platforms = []
-        self.async_remove_subscriber_funcs = []
+        self.async_remove_subscriber_funcs_by_source = {}
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
 
@@ -84,15 +84,11 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         remove_subscriber = async_dispatcher_connect(
             self.hass, REALTIME_DISPATCH_SIGNAL, target
         )
-        self.async_remove_subscriber_funcs.append(remove_subscriber)
         _LOGGER.debug("Subscribed target for %s to dispatcher", source)
+        self.async_remove_subscriber_funcs_by_source[source] = remove_subscriber
 
-    def async_realtime_remove_subscribers_to_dispatcher(self):
-        """Remove all existing subscribvers to the dispatch"""
-        _LOGGER.debug(
-            "Removing %d subscribers to dispatcher",
-            len(self.async_remove_subscriber_funcs),
-        )
-        if self.async_remove_subscriber_funcs:
-            for func in self.async_remove_subscriber_funcs:
-                func()
+    def async_realtime_unsubscribe_from_dispatcher(self, source: str):
+        """Remove a subscriber from the dispatch."""
+        if source in self.self.async_remove_subscriber_funcs_by_source:
+            _LOGGER.debug("Removing subscribers to dispatcher for %s", source)
+            self.self.async_remove_subscriber_funcs_by_source[source]()

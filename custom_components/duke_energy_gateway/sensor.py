@@ -20,7 +20,7 @@ from .entity import DukeEnergyGatewayEntity
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
-async def async_setup_entry(hass, entry, async_add_devices):
+async def async_setup_entry(hass, entry, async_add_entities):
     """Setup sensor platform."""
     data = hass.data[DOMAIN][entry.entry_id]
 
@@ -58,12 +58,9 @@ async def async_setup_entry(hass, entry, async_add_devices):
     sensors.append(_TotalUsageTodaySensor(coordinator, entry, meter, gateway))
 
     # Real-time usage sensor
-    realtime_sensor = _RealtimeUsageSensor(coordinator, entry, meter, gateway)
-    sensors.append(realtime_sensor)
+    sensors.append(_RealtimeUsageSensor(coordinator, entry, meter, gateway))
 
-    async_add_devices(sensors)
-
-    realtime_sensor.async_subscribe_to_dispatcher()
+    async_add_entities(sensors)
 
 
 @dataclass
@@ -87,6 +84,7 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity, ABC):
         gateway: GatewayStatus,
     ):
         """Initialize the sensor."""
+        self._state = None
         self._sensor_metadata = self.get_sensor_metadata()
         super().__init__(
             coordinator,
@@ -147,7 +145,8 @@ class _TotalUsageTodaySensor(DukeEnergyGatewaySensor):
             today_usage = sum(x.usage for x in gw_usage) / 1000
         else:
             today_usage = 0
-        return today_usage
+        self._state = today_usage
+        return self._state
 
     @property
     def extra_state_attributes(self):
@@ -171,9 +170,9 @@ class _RealtimeUsageSensor(DukeEnergyGatewaySensor):
     @staticmethod
     def get_sensor_metadata() -> _SensorMetadata:
         return _SensorMetadata(
-            "current_usage_kw",
-            "Current Usage [kW]",
-            "kW",
+            "current_usage_w",
+            "Current Usage [W]",
+            "W",
             "mdi:flash",
             "power",
             STATE_CLASS_MEASUREMENT,
@@ -183,13 +182,25 @@ class _RealtimeUsageSensor(DukeEnergyGatewaySensor):
     def should_poll(self) -> bool:
         return False
 
-    @staticmethod
-    def on_new_measurement(measurement: RealtimeUsageMeasurement):
-        """Handle a new measurement from the real-time stream."""
-        _LOGGER.debug("New measurement received: %f", measurement.usage)
+    @property
+    def state(self):
+        """Current state is stored in the _state instance variable."""
+        return self._state
 
-    def async_subscribe_to_dispatcher(self) -> None:
-        """Subscribe to the real-time data stream."""
+    async def async_added_to_hass(self):
+        """Subscribe to updates."""
+
+        async def async_on_new_measurement(measurement: RealtimeUsageMeasurement):
+            _LOGGER.debug("New measurement received: %f", measurement.usage)
+            self._state = measurement.usage
+            await self.async_update_ha_state()
+
         self.coordinator.async_realtime_subscribe_to_dispatcher(
-            _RealtimeUsageSensor.__name__, _RealtimeUsageSensor.on_new_measurement
+            _RealtimeUsageSensor.__name__, async_on_new_measurement
+        )
+
+    async def async_will_remove_from_hass(self):
+        """Undo subscription."""
+        self.coordinator.async_realtime_unsubscribe_from_dispatcher(
+            _RealtimeUsageSensor.__name__
         )
