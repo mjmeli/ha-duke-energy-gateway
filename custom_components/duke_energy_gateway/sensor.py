@@ -6,6 +6,8 @@ from homeassistant.components.sensor import (
     STATE_CLASS_MEASUREMENT,
     SensorEntity,
 )
+from homeassistant.helpers import device_registry
+from homeassistant.helpers.device_registry import async_get as async_get_device_registry
 from homeassistant.util import dt
 from pyduke_energy.types import (
     GatewayStatus,
@@ -153,6 +155,22 @@ async def async_setup_entry(hass, entry, async_add_devices):
     gateway = data["gateway"]
     if not gateway:
         return False
+
+    # Prior to v1.0, the gateway device had the entity ID in its unique identifier.
+    # This causes issues when we started adding multiple entities (creates multiple devices).
+    # To fix this, we will check if the old device exists and update its identifier.
+    registry = async_get_device_registry(hass)
+    device_to_update = registry.async_get_device(
+        identifiers={(DOMAIN, "duke_energy_usage_today_kwh")}, connections=set()
+    )
+    if device_to_update:
+        _LOGGER.info(
+            "Correcting Duke Energy Gateway Device %s unique identifier after 1.0 update",
+            gateway.id,
+        )
+        registry.async_update_device(
+            device_to_update.id, new_identifiers={(DOMAIN, gateway.id)}
+        )
 
     sensors = []
     for sensor in SENSORS:
