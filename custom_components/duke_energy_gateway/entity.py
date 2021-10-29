@@ -32,7 +32,7 @@ class DukeEnergyGatewayEntity(CoordinatorEntity):
     @property
     def device_info(self):
         return {
-            "identifiers": {(DOMAIN, self.unique_id)},
+            "identifiers": {(DOMAIN, self._gateway.id)},
             "name": f"{NAME} {self._gateway.id}",
             "model": VERSION,
             "manufacturer": NAME,

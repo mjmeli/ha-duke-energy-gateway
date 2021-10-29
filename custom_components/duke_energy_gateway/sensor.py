@@ -1,28 +1,141 @@
 """Sensor platform for Duke Energy Gateway."""
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.components.sensor import STATE_CLASS_TOTAL_INCREASING
+import logging
+from typing import Any, Awaitable
+from homeassistant.components.sensor import (
+    STATE_CLASS_TOTAL_INCREASING,
+    STATE_CLASS_MEASUREMENT,
+    SensorEntity,
+)
 from homeassistant.util import dt
-from pyduke_energy.types import GatewayStatus
-from pyduke_energy.types import MeterInfo
-from pyduke_energy.types import UsageMeasurement
+from pyduke_energy.types import (
+    GatewayStatus,
+    MeterInfo,
+    RealtimeUsageMeasurement,
+    UsageMeasurement,
+)
 
 from .const import DOMAIN
+from .coordinator import DukeEnergyGatewayUsageDataUpdateCoordinator
 from .entity import DukeEnergyGatewayEntity
+
+_LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
 class _Sensor:
-    def __init__(self, entity_id, name, unit, icon, device_class):
+    def __init__(
+        self,
+        entity_id: str,
+        name: str,
+        unit: str,
+        icon: str,
+        device_class: str,
+        state_class: str,
+    ):
         self.entity_id = entity_id
         self.name = name
         self.unit = unit
         self.icon = icon
         self.device_class = device_class
+        self.state_class = state_class
+
+    @property
+    def should_poll(self) -> bool:
+        """Whether or not to poll."""
+        return True
+
+    def state(self, _coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator) -> Any:
+        """Override to define the state function."""
+
+    def extra_state_attrs(
+        self,
+        _coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator,
+        attrs: dict[str, str],
+    ) -> dict[str, str]:
+        """Override to return any extra state attributes desired."""
+        return attrs
 
 
-# Sensor are defined like: Name, Unit, icon, device class
-SENSORS = [
-    _Sensor("usage_today_kwh", "Usage Today [kWh]", "kWh", "mdi:flash", "energy")
-]
+class _PollSensor(_Sensor):
+    @property
+    def should_poll(self) -> bool:
+        return True
+
+
+class _PushSensor(_Sensor):
+    @property
+    def should_poll(self) -> bool:
+        return False
+
+    async def async_subscribe(
+        self, coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator
+    ) -> Awaitable[None]:
+        """Use to setup a subscription to the push event producer."""
+
+
+class _TotalUsageTodaySensor(_PollSensor):
+    def __init__(self):
+        super().__init__(
+            "usage_today_kwh",
+            "Usage Today [kWh]",
+            "kWh",
+            "mdi:flash",
+            "energy",
+            STATE_CLASS_TOTAL_INCREASING,
+        )
+
+    def state(self, coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator):
+        """Return today's usage by summing all measurements."""
+        gw_usage: list[UsageMeasurement] = coordinator.data
+        if gw_usage and len(gw_usage) > 0:
+            today_usage = sum(x.usage for x in gw_usage) / 1000
+        else:
+            today_usage = 0
+        return today_usage
+
+    def extra_state_attrs(
+        self,
+        coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator,
+        attrs: dict[str, str],
+    ):
+        """Record the timestamp of the last measurement."""
+        gw_usage: list[UsageMeasurement] = coordinator.data
+        if gw_usage and len(gw_usage) > 0:
+            last_measurement = dt.as_local(
+                dt.utc_from_timestamp(gw_usage[-1].timestamp)
+            )
+        else:
+            # If no data then it's probably the start of the day so use that as the dates
+            last_measurement = dt.start_of_local_day()
+        attrs["last_measurement"] = last_measurement
+        return attrs
+
+
+class _RealtimeUsageSensor(_PushSensor):
+    def __init__(self):
+        super().__init__(
+            "current_usage_kw",
+            "Current Usage [kW]",
+            "kW",
+            "mdi:flash",
+            "power",
+            STATE_CLASS_MEASUREMENT,
+        )
+
+    @staticmethod
+    def on_new_measurement(measurement: RealtimeUsageMeasurement):
+        """Handle a new measurement from the real-time stream."""
+        _LOGGER.debug("New measurement received: %f", measurement.usage)
+
+    def connect_to_dispatcher(
+        self, coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator
+    ) -> None:
+        """Subscribe to the real-time data stream."""
+        coordinator.realtime_connect_to_dispatcher(
+            _RealtimeUsageSensor.on_new_measurement
+        )
+
+
+SENSORS = [_TotalUsageTodaySensor(), _RealtimeUsageSensor()]
 
 
 async def async_setup_entry(hass, entry, async_add_devices):
@@ -46,6 +159,9 @@ async def async_setup_entry(hass, entry, async_add_devices):
         sensors.append(
             DukeEnergyGatewaySensor(coordinator, entry, sensor, meter, gateway)
         )
+
+        # if isinstance(sensor, _PushSensor):
+        # sensor.connect_to_dispatcher(coordinator)
 
     async_add_devices(sensors)
 
@@ -80,13 +196,7 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        # Currently there is only one sensor so this works. If we add more then we will need to handle this better.
-        gw_usage: list[UsageMeasurement] = self.coordinator.data
-        if gw_usage and len(gw_usage) > 0:
-            today_usage = sum(x.usage for x in gw_usage) / 1000
-        else:
-            today_usage = 0
-        return today_usage
+        return self._sensor.state(self.coordinator)
 
     @property
     def unit_of_measurement(self):
@@ -106,23 +216,15 @@ class DukeEnergyGatewaySensor(DukeEnergyGatewayEntity, SensorEntity):
     @property
     def state_class(self):
         """Return the state class of the sensor"""
-        return STATE_CLASS_TOTAL_INCREASING
+        return self._sensor.state_class
 
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
         attrs = super().extra_state_attributes
-
-        # Currently there is only one sensor so this works. If we add more then we will need to handle this better.
-        gw_usage: list[UsageMeasurement] = self.coordinator.data
-        if gw_usage and len(gw_usage) > 0:
-            last_measurement = dt.as_local(
-                dt.utc_from_timestamp(gw_usage[-1].timestamp)
-            )
-        else:
-            # If no data then it's probably the start of the day so use that as the dates
-            last_measurement = dt.start_of_local_day()
-
-        attrs["last_measurement"] = last_measurement
-
+        attrs = self._sensor.extra_state_attrs(self.coordinator, attrs)
         return attrs
+
+    @property
+    def should_poll(self) -> bool:
+        return self._sensor.should_poll
