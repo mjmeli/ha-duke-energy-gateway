@@ -15,11 +15,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from pyduke_energy.client import DukeEnergyClient
 from pyduke_energy.realtime import DukeEnergyRealtime
 
-from .const import (
-    CONF_EMAIL,
-    CONF_REALTIME_INTERVAL,
-    CONF_REALTIME_INTERVAL_DEFAULT_SEC,
-)
+from .const import CONF_EMAIL
 from .const import CONF_PASSWORD
 from .const import DOMAIN
 from .const import PLATFORMS

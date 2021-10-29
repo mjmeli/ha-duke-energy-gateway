@@ -1,6 +1,7 @@
 """Sensor platform for Duke Energy Gateway."""
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import SensorEntity
