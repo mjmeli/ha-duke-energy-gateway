@@ -48,7 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     session = async_get_clientsession(hass)
     client = DukeEnergyClient(email, password, session)
     realtime = DukeEnergyRealtime(client)
-    _LOGGER.debug("Setup Duke Energy API clients")
+    _LOGGER.debug("Set up Duke Energy API clients")
 
     # Find the meter that is used for the gateway
     selected_meter, selected_gateway = await client.select_default_meter()
@@ -106,7 +106,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unloaded:
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    # Cleanup real-time stream if it wasn't already done so
+    # Cleanup real-time stream if it wasn't already done so (it should already be done by the sensor entity)
     _LOGGER.debug("Checking for clean-up of real-time stream in async_unload_entry")
     coordinator.realtime_cancel()
     coordinator.async_realtime_unsubscribe_all_from_dispatcher()
