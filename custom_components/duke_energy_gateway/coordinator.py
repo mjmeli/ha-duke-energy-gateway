@@ -7,7 +7,7 @@ from typing import Callable
 
 from homeassistant.core import DOMAIN
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.dispatcher import dispatcher_connect
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.dispatcher import dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
@@ -36,6 +36,7 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         self.client = client
         self.realtime = realtime
         self.platforms = []
+        self.async_remove_subscriber_funcs = []
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
 
@@ -63,12 +64,6 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
             )
             raise
 
-    def realtime_connect_to_dispatcher(
-        self, target: Callable[[RealtimeUsageMeasurement], Any]
-    ):
-        """Setup a subscriber to receive new real-time measurements."""
-        dispatcher_connect(self.hass, REALTIME_DISPATCH_SIGNAL, target)
-
     def _realtime_on_msg(self, msg):
         """Handler for the real-time usage MQTT messages."""
         try:
@@ -81,3 +76,23 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
                 exception,
                 msg.payload.decode("utf8"),
             )
+
+    def async_realtime_subscribe_to_dispatcher(
+        self, source: str, target: Callable[[RealtimeUsageMeasurement], Any]
+    ):
+        """Setup a subscriber to receive new real-time measurements."""
+        remove_subscriber = async_dispatcher_connect(
+            self.hass, REALTIME_DISPATCH_SIGNAL, target
+        )
+        self.async_remove_subscriber_funcs.append(remove_subscriber)
+        _LOGGER.debug("Subscribed target for %s to dispatcher", source)
+
+    def async_realtime_remove_subscribers_to_dispatcher(self):
+        """Remove all existing subscribvers to the dispatch"""
+        _LOGGER.debug(
+            "Removing %d subscribers to dispatcher",
+            len(self.async_remove_subscriber_funcs),
+        )
+        if self.async_remove_subscriber_funcs:
+            for func in self.async_remove_subscriber_funcs:
+                func()

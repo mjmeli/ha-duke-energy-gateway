@@ -25,7 +25,7 @@ from .coordinator import DukeEnergyGatewayUsageDataUpdateCoordinator
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
-async def async_setup(hass: HomeAssistant, config: Config):
+async def async_setup(_hass: HomeAssistant, _config: Config):
     """Set up this integration using YAML is not supported."""
     return True
 
@@ -63,7 +63,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         raise ConfigEntryNotReady
 
     # Initialize the real-time data stream
-    # coordinator.realtime_initialize()
+    coordinator.realtime_initialize()
     _LOGGER.debug("Setup Duke Energy API realtime client")
 
     hass.data[DOMAIN][entry.entry_id] = {
@@ -85,7 +85,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Handle removal of an entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    coordinator: DukeEnergyGatewayUsageDataUpdateCoordinator = hass.data[DOMAIN][
+        entry.entry_id
+    ]["coordinator"]
+
+    # Remove any subscribers to the dispatch
+    coordinator.async_realtime_remove_subscribers_to_dispatcher()
+
     unloaded = all(
         await asyncio.gather(
             *[

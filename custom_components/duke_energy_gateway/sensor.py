@@ -58,10 +58,12 @@ async def async_setup_entry(hass, entry, async_add_devices):
     sensors.append(_TotalUsageTodaySensor(coordinator, entry, meter, gateway))
 
     # Real-time usage sensor
-    sensors.append(_RealtimeUsageSensor(coordinator, entry, meter, gateway))
-    # sensor.connect_to_dispatcher(coordinator)
+    realtime_sensor = _RealtimeUsageSensor(coordinator, entry, meter, gateway)
+    sensors.append(realtime_sensor)
 
     async_add_devices(sensors)
+
+    realtime_sensor.async_subscribe_to_dispatcher()
 
 
 @dataclass
@@ -186,8 +188,8 @@ class _RealtimeUsageSensor(DukeEnergyGatewaySensor):
         """Handle a new measurement from the real-time stream."""
         _LOGGER.debug("New measurement received: %f", measurement.usage)
 
-    def connect_to_dispatcher(self) -> None:
+    def async_subscribe_to_dispatcher(self) -> None:
         """Subscribe to the real-time data stream."""
-        self.coordinator.realtime_connect_to_dispatcher(
-            _RealtimeUsageSensor.on_new_measurement
+        self.coordinator.async_realtime_subscribe_to_dispatcher(
+            _RealtimeUsageSensor.__name__, _RealtimeUsageSensor.on_new_measurement
         )
