@@ -12,17 +12,27 @@
 [![Project Maintenance][maintenance-shield]][user_profile]
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
-This is a custom integration for [Home Assistant](https://www.home-assistant.io/). It pulls near-real-time energy usage from Duke Energy via the Duke Energy Gateway pilot program.
-
-This component will set up the following entities.
-
-| Platform                             | Description                                                                                                                                                                                                           |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sensor.duke_energy_usage_today_kwh` | Represents today's energy consumption (from 0:00 local time to 23:59 local time, then resetting). Additional attributes are available containing the meter ID, gateway ID, and the timestamp of the last measurement. |
+This is a custom integration for [Home Assistant](https://www.home-assistant.io/). It pulls real-time energy usage from Duke Energy via the Duke Energy Gateway pilot program.
 
 This integration leverages the [`pyduke-energy`](https://github.com/mjmeli/pyduke-energy) library, also written by me, to pull data. This API is _very_ unofficial and may stop working at any time (see [Disclaimer](https://github.com/mjmeli/pyduke-energy#Disclaimer)). Also, you are required to have a Duke Energy Gateway connected to your smartmeter for this to work. This integration does not support any other method of retrieving data (see [Gateway Requirement](https://github.com/mjmeli/pyduke-energy#gateway-requirement)).
 
-Energy usage will be provided as _daily_ data, resetting at midnight local time. At the moment, the API appears to be limited to providing new records every 15 minutes, meaning readings could be delayed up to 15 minutes. For more information, see [limitations](https://github.com/mjmeli/pyduke-energy#limitations) in the `pyduke-energy` repo.
+## Sensors
+
+This component will set up the following entities:
+
+### `sensor.duke_energy_current_usage_w`
+
+- Represents the real-time _power_ usage in watts.
+- This data is pushed from the gateway device every few seconds. If this update interval is too frequent for you, you can configure a throttling interval in seconds (see [Configuration](#Configuration) below).
+- Note that since this is power usage, it cannot be used as-is for the Home Assistant energy dashboard. Instead, you can use the `sensor.duke_energy_usage_today_kwh` sensor, or you need to feed this real-time sensor through the [Riemann sum integral integration](https://www.home-assistant.io/integrations/integration/).
+- Additional attributes are available containing the meter ID and gateway ID.
+
+### `sensor.duke_energy_usage_today_kwh`
+
+- Represents today's _energy_ consumption in kilowatt-hours (from 0:00 local time to 23:59 local time, then resetting).
+- This data is polled every 60 seconds, but data may be delayed up to 15 minutes due to delays in Duke Energy reporting it (see [Limitations](https://github.com/mjmeli/pyduke-energy#Limitations) in the `pyduke-energy` repo.).
+- This can be used as-is for the Home Assistant energy consumption dashboard.
+- Additional attributes are available containing the meter ID, gateway ID, and the timestamp of the last measurement.
 
 ## Installation
 
@@ -42,18 +52,39 @@ Energy usage will be provided as _daily_ data, resetting at midnight local time.
 6. Restart Home Assistant
 7. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Duke Energy Gateway"
 
-## Configuration is done in the UI
+## Configuration
 
-Configuration will be done in the UI. You will need to provide the following data:
+Configuration will be done in the UI. Initially, you will need to provide the following data:
 
 | Data       | Description                         |
 | ---------- | ----------------------------------- |
 | `email`    | Your login email to Duke Energy.    |
 | `password` | Your login password to Duke Energy. |
 
+After the integration is setup, you will be able to do further configuration by clicking "Configure" on the integration page. This will allow you to modify the following options:
+
+| Data                                    | Description                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Real-time Usage Update Interval (sec)` | By default, the real-time usage sensor will be updated any time a reading comes in. If this data is too frequent, you can configure this value to throttle the data. When set to a positive integer `X`, the sensor will only be updated once every `X` seconds. In other words, if set to 30, you will get a new real-time usage every ~30 seconds. |
+
 ### Meter Selection
 
 The configuration flow will automatically attempt to identify your gateway and smartmeter. Right now, only one is supported per account. The first one identified will be used. If one cannot be found, the configuration process should fail.
+
+If your meter selection fails, a first step should be to enable logging for the component (see [Logging](#Logging)). If this does not give insight into the problem, please open a GitHub issue.
+
+### Logging
+
+If you run into any issues and want to look into the logs, this integration provides verbose logging at the debug level. That can be enabled by adding the following to your `configuration.yaml` file.
+
+```yaml
+logger:
+  default: info
+  logs:
+    custom_components.duke_energy_gateway: debug
+    pyduke_energy.client: debug
+    pyduke_energy.realtime: debug
+```
 
 ## Development
 
