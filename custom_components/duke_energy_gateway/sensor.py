@@ -158,7 +158,7 @@ class _TotalUsageTodaySensor(DukeEnergyGatewaySensor):
         """Return today's usage by summing all measurements."""
         gw_usage: list[UsageMeasurement] = self._coordinator.data
         if gw_usage and len(gw_usage) > 0:
-            today_usage = sum(x.usage for x in gw_usage) / 1000
+            today_usage = round(sum(x.usage for x in gw_usage) / 1000, 5)
         else:
             today_usage = 0
         self._state = today_usage
