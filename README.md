@@ -23,7 +23,7 @@ This component will set up the following entities:
 ### `sensor.duke_energy_current_usage_w`
 
 - Represents the real-time _power_ usage in watts.
-- This data is pushed from the gateway device every 1-3 seconds. *NOTE:* This produces a lot of data. If this update interval is too frequent for you, you can configure a throttling interval in seconds (see [Configuration](#Configuration) below).
+- This data is pushed from the gateway device every 1-3 seconds. _NOTE:_ This produces a lot of data. If this update interval is too frequent for you, you can configure a throttling interval in seconds (see [Configuration](#Configuration) below).
 - Note that since this is power usage, it cannot be used as-is for the Home Assistant energy dashboard. Instead, you can use the `sensor.duke_energy_usage_today_kwh` sensor, or you need to feed this real-time sensor through the [Riemann sum integral integration](https://www.home-assistant.io/integrations/integration/).
 - Additional attributes are available containing the meter ID and gateway ID.
 
