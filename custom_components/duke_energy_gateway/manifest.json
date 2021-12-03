@@ -1,7 +1,7 @@
 {
   "domain": "duke_energy_gateway",
   "name": "Duke Energy Gateway",
-  "version": "0.1.0b6",
+  "version": "0.1.0b7",
   "documentation": "https://github.com/mjmeli/ha-duke-energy-gateway",
   "issue_tracker": "https://github.com/mjmeli/ha-duke-energy-gateway/issues",
   "dependencies": [],
