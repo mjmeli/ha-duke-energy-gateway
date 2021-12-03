@@ -131,7 +131,7 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
         if source in self.async_realtime_remove_subscriber_funcs_by_source:
             _LOGGER.debug("Removing subscribers to dispatcher for %s", source)
             self.async_realtime_remove_subscriber_funcs_by_source[source]()
-            self.async_realtime_remove_subscriber_funcs_by_source[source] = None
+            self.async_realtime_remove_subscriber_funcs_by_source.pop(source)
 
     def async_realtime_unsubscribe_all_from_dispatcher(self):
         """Remove all subscribers from the dispatch."""
