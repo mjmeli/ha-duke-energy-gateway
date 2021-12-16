@@ -94,6 +94,14 @@ If you want to install manually, you can install dev dependencies with `pip inst
 
 Before commiting, run `pre-commit run --all-files`.
 
+### Working With In Development `pyduke-energy` Versions
+
+If you are working on implementing new changes from `pyduke-energy` but do not want to release version of that library, you can set up your development environment to install from a remote working branch.
+
+1. Update [`requirements_dev.txt`](requirements_dev.txt) to replace the `main` in `git+https://github.com/mjmeli/pyduke-energy@main` with your working branch and update the username if you have a fork (e.g. `git+https://github.com/notmjmeli/pyduke-energy@new-feature-dev-branch`)
+2. Uninstall locally cached version of `pyduke-energy`: `pip uninstall -y pyduke-energy`
+3. Re-run requirements installation: `pip install -r requirements_dev.txt`
+
 ## Contributions are welcome!
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
