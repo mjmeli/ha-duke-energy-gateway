@@ -15,6 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.0.11] - 2021-12-15
+
+### Fixed
+
+- Tick `pyduke-energy` version to 0.0.15 to fix an issue where the usage measurement was extremely high (fixes #50)
+
+## [0.0.10] - 2021-09-21
+
+### Fixed
+
+- Fix bug where we keep checking other meters when we have already found a matching one (fixes #18)
+
 ## [0.0.9] - 2021-09-08
 
 ### Fixed
@@ -77,7 +89,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Pulls today's current energy usage into entity sensor.duke_energy_usage_today_kwh
 
-[unreleased]: https://github.com//mjmeli/ha-duke-energy-gateway/compare/0.0.9...HEAD
+[unreleased]: https://github.com//mjmeli/ha-duke-energy-gateway/compare/0.0.11...HEAD
+[0.0.11]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.11
+[0.0.10]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.10
 [0.0.9]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.9
 [0.0.8]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.8
 [0.0.7]: https://github.com/mjmeli/ha-duke-energy-gateway/releases/tag/0.0.7

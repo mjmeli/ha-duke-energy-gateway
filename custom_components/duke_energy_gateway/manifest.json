@@ -7,6 +7,6 @@
   "dependencies": [],
   "config_flow": true,
   "codeowners": ["@mjmeli"],
-  "requirements": ["pyduke-energy==0.0.14"],
+  "requirements": ["pyduke-energy==0.0.15"],
   "iot_class": "cloud_polling"
 }
