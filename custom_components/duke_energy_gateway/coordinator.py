@@ -62,9 +62,9 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
     def realtime_initialize(self):
         """Setup callbacks, connect, and subscribe to the real-time usage MQTT stream."""
         try:
-            self.realtime.on_msg = self._realtime_on_msg
+            self.realtime.on_message = self._realtime_on_message
             self.realtime_task = asyncio.create_task(
-                self.realtime.connect_and_subscribe()
+                self.realtime.connect_and_subscribe_forever()
             )
             _LOGGER.debug("Triggered real-time connect/subscribe async task")
         except Exception as exception:
@@ -81,7 +81,7 @@ class DukeEnergyGatewayUsageDataUpdateCoordinator(DataUpdateCoordinator):
             self.realtime_task = None
             _LOGGER.debug("Cancelled real-time async task")
 
-    def _realtime_on_msg(self, msg):
+    def _realtime_on_message(self, msg):
         """Handler for the real-time usage MQTT messages."""
         try:
             measurement = self.realtime.msg_to_usage_measurement(msg)

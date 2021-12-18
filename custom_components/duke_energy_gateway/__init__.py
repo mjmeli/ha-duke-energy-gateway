@@ -106,7 +106,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unloaded:
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    # Cleanup real-time stream if it wasn't already done so (it should already be done by the sensor entity)
+    # Cleanup real-time stream if it wasn't already done so (it should be done by the sensor entity)
     _LOGGER.debug("Checking for clean-up of real-time stream in async_unload_entry")
     coordinator.realtime_cancel()
     coordinator.async_realtime_unsubscribe_all_from_dispatcher()
