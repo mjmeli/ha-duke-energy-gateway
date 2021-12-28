@@ -7,8 +7,9 @@ from pyduke_energy.client import DukeEnergyClient
 
 from .const import CONF_EMAIL
 from .const import CONF_PASSWORD
+from .const import CONF_REALTIME_INTERVAL
+from .const import CONF_REALTIME_INTERVAL_DEFAULT_SEC
 from .const import DOMAIN
-from .const import PLATFORMS
 
 
 class DukeEnergyGatewayFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -89,18 +90,29 @@ class DukeEnergyGatewayOptionsFlowHandler(config_entries.OptionsFlow):
             self.options.update(user_input)
             return await self._update_options()
 
+        realtime_interval = self.options.get(
+            CONF_REALTIME_INTERVAL, CONF_REALTIME_INTERVAL_DEFAULT_SEC
+        )
+
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required(x, default=self.options.get(x, True)): bool
-                    for x in sorted(PLATFORMS)
+                    vol.Required(
+                        CONF_REALTIME_INTERVAL,
+                        default=realtime_interval,
+                    ): int,
                 }
             ),
         )
 
     async def _update_options(self):
         """Update config entry options."""
+        update_interval = self.options.get(
+            CONF_REALTIME_INTERVAL, CONF_REALTIME_INTERVAL_DEFAULT_SEC
+        )
+        if update_interval < 0:
+            return self.async_abort(reason="invalid_update_interval_value")
         return self.async_create_entry(
             title=self.config_entry.data.get(CONF_EMAIL), data=self.options
         )

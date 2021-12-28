@@ -23,9 +23,13 @@
         "data": {
           "binary_sensor": "Binary sensor enabled",
           "sensor": "Sensor enabled",
-          "switch": "Switch enabled"
+          "switch": "Switch enabled",
+          "realtimeInterval": "Real-time Usage Update Interval (sec)"
         }
       }
+    },
+    "abort": {
+      "invalid_update_interval_value": "The Real-time Usage Update Interval must be a positive integer or 0 for no interval."
     }
   }
 }

@@ -4,5 +4,7 @@ logger:
   default: info
   logs:
     custom_components.duke_energy_gateway: debug
+    pyduke_energy.client: debug
+    pyduke_energy.realtime: debug
 # If you need to debug uncommment the line below (doc: https://www.home-assistant.io/integrations/debugpy/)
 # debugpy:
