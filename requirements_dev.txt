@@ -1,5 +1,5 @@
 black==21.7b0
-flake8==3.9.2
+flake8==4.0.1
 pre-commit==2.14.0
 pylint==2.10.2
 reorder-python-imports==3.1.0
