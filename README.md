@@ -40,7 +40,7 @@ This component will set up the following entities:
 
 1. Add as a Custom Repository under Settings in HACS: `mjmeli/ha-duke-energy-gateway` and choose `Integration` as the Category.
 2. Restart Home Assistant
-3. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Duke Energy Gateway"
+3. In the HA UI go to "Settings" -> "Devices and Services", make sure you are on the Integrations tab, then click "+" and search for "Duke Energy Gateway"
 
 ### Manual Installation
 
