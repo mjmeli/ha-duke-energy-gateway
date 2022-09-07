@@ -15,6 +15,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.1.2] - 2022-09-07
+
+### Fixed
+
+- Update pydukeenergy version to 1.0.2 to fix account details errors on initialization (fixes #128)
+
+## [0.1.1] - 2022-05-24
+
+### Fixed
+
+- Update pydukeenergy version to 1.0.1 to fix login issue by @mjmeli in #101 (fixes #100)
+
+## [0.1.0] - 2021-12-28
+
+This is a large feature update to the Duke Energy integration. This is a large refactoring of the integration required to implement a new sensor - realtime power usage!
+
+Highlights of this release will be:
+
+- Moved default meter selection logic into abstracted pyduke-energy function select_default_meter
+- Implementation of real-time power usage sensor
+  - New sensor `sensor.duke_energy_current_usage_w` that represents the real-time power usage in watts.
+  - This data is pushed from the gateway device every 1-3 seconds. NOTE: This produces a lot of data. If this update interval is too frequent for you, you can configure a throttling interval in seconds via the integration configuration.
+  - Note that since this is power usage, it cannot be used as-is for the Home Assistant energy dashboard. Instead, you can use the `sensor.duke_energy_usage_today_kwh` sensor, or you need to feed this real-time sensor through the Riemann sum integral integration.
+- Add rounding to usage today sensor
+- Additional debug logging for investigating issues
+
 ## [0.0.11] - 2021-12-15
 
 ### Fixed
