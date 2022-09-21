@@ -14,7 +14,10 @@
 
 This is a custom integration for [Home Assistant](https://www.home-assistant.io/). It pulls real-time energy usage from Duke Energy via the Duke Energy Gateway pilot program.
 
-This integration leverages the [`pyduke-energy`](https://github.com/mjmeli/pyduke-energy) library, also written by me, to pull data. This API is _very_ unofficial and may stop working at any time (see [Disclaimer](https://github.com/mjmeli/pyduke-energy#Disclaimer)). Also, you are required to have a Duke Energy Gateway connected to your smartmeter for this to work. This integration does not support any other method of retrieving data (see [Gateway Requirement](https://github.com/mjmeli/pyduke-energy#gateway-requirement)).
+This integration leverages the [`pyduke-energy`](https://github.com/mjmeli/pyduke-energy) library, also written by me, to pull data. This API is _very_ unofficial and may stop working at any time (see [Disclaimer](https://github.com/mjmeli/pyduke-energy#Disclaimer)).
+
+## IMPORTANT Pre-Requisites! (Please Read)
+You are required to have a Duke Energy Gateway connected to your smartmeter for this to work. This integration does not support any other method of retrieving data (see [Gateway Requirement](https://github.com/mjmeli/pyduke-energy#gateway-requirement)).
 
 ## Sensors
 
