@@ -1,6 +1,6 @@
 black==22.8.0
 flake8==5.0.4
 pre-commit==2.20.0
-pylint==2.15.2
+pylint==2.15.7
 reorder-python-imports==3.8.2
 git+https://github.com/mjmeli/pyduke-energy@main
