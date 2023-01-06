@@ -139,6 +139,6 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/mjmeli/ha-duke-energy-gateway.svg?style=for-the-badge
 [releases]: https://github.com/mjmeli/ha-duke-energy-gateway/releases
-[build-shield]: https://img.shields.io/github/workflow/status/mjmeli/ha-duke-energy-gateway/Linting?style=for-the-badge
+[build-shield]: https://img.shields.io/github/actions/workflow/status/mjmeli/ha-duke-energy-gateway/tests.yaml?style=for-the-badge
 [build]: https://github.com/mjmeli/ha-duke-energy-gateway/actions/workflows/tests.yaml
 [user_profile]: https://github.com/mjmeli
