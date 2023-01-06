@@ -33,7 +33,7 @@ jobs:
 
       - name: Install Python modules
         run: |
-          pip install -r requirements_dev.txt
+          pip install --constraint=requirements_dev.txt pre-commit black flake8 reorder-python-imports
 
       - name: Run pre-commit on all files
         run: |
