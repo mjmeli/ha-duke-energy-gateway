@@ -1,12 +1,16 @@
 {
   "domain": "duke_energy_gateway",
   "name": "Duke Energy Gateway",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "documentation": "https://github.com/mjmeli/ha-duke-energy-gateway",
   "issue_tracker": "https://github.com/mjmeli/ha-duke-energy-gateway/issues",
   "dependencies": [],
   "config_flow": true,
-  "codeowners": ["@mjmeli"],
-  "requirements": ["pyduke-energy==1.0.3"],
+  "codeowners": [
+    "@mjmeli"
+  ],
+  "requirements": [
+    "pyduke-energy==1.0.5"
+  ],
   "iot_class": "cloud_polling"
 }
