@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.1.3] - 2023-01-06
+
+### Fixed
+
+- Update pydukeenergy version to 1.0.3 to fix realtime stream constantly timing out (fixes #153)
+
 ## [0.1.2] - 2022-09-07
 
 ### Fixed
