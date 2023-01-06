@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.1.4] - 2023-01-06
+
+### Fixed
+
+- Update pydukeenergy version to 1.0.5 to increase time at which MQTT timeouts fail realtime stream
+
 ## [0.1.3] - 2023-01-06
 
 ### Fixed
