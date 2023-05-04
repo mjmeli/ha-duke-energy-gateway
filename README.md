@@ -16,7 +16,11 @@ This is a custom integration for [Home Assistant](https://www.home-assistant.io/
 
 This integration leverages the [`pyduke-energy`](https://github.com/mjmeli/pyduke-energy) library, also written by me, to pull data. This API is _very_ unofficial and may stop working at any time (see [Disclaimer](https://github.com/mjmeli/pyduke-energy#Disclaimer)).
 
-## IMPORTANT Pre-Requisites! (Please Read)
+## IMPORTANT - Deprecation Warning
+
+Duke Energy is shutting down the Gateway pilot program at the end of June. This integration will stop functioning and will be deprecated.
+
+## Pre-Requisites! (Please Read)
 
 You are required to have a Duke Energy Gateway connected to your smartmeter for this to work. This is a **separate** device than your Smart Meter and is provided by an invitation only program at the moment. If you don't know what this is, then you probably don't have it. This integration does not support any other method of retrieving data (see [Gateway Requirement](https://github.com/mjmeli/pyduke-energy#gateway-requirement)).
 

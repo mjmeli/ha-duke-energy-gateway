@@ -200,7 +200,7 @@ class _RealtimeUsageSensor(DukeEnergyGatewaySensor):
         async def async_on_new_measurement(measurement: RealtimeUsageMeasurement):
             _LOGGER.debug("New measurement received: %f", measurement.usage)
             self._state = measurement.usage
-            await self.async_update_ha_state()
+            await self.async_write_ha_state()
 
         # Attach subscriber callback
         self._coordinator.async_realtime_subscribe_to_dispatcher(
