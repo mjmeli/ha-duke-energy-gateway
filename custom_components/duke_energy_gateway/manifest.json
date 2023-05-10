@@ -7,6 +7,6 @@
   "documentation": "https://github.com/mjmeli/ha-duke-energy-gateway",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/mjmeli/ha-duke-energy-gateway/issues",
-  "requirements": ["pyduke-energy==1.0.5"],
-  "version": "0.1.6"
+  "requirements": ["pyduke-energy==1.0.6"],
+  "version": "0.1.7"
 }

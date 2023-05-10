@@ -15,6 +15,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.1.7] - 2023-05-10
+
+### Fixed
+
+- Update pydukeenergy version to 1.0.6 to get updated basic auth digest
+
+## [0.1.6] - 2023-05-04
+
+### Fixed
+
+- fix await issue
+
+## [0.1.5] - 2023-05-04
+
+### Fixed
+
+- update to async_write_ha_state
+
 ## [0.1.4] - 2023-01-06
 
 ### Fixed
