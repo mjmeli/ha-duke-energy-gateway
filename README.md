@@ -1,3 +1,7 @@
+## IMPORTANT - DEPRECATED
+
+Duke Energy shut down the Gateway pilot program at the end of June 2023. This integration has stopped functioning and is deprecated.
+
 # <img height="80" src="https://github.com/mjmeli/ha-duke-energy-gateway/blob/main/assets/logo.png?raw=true" alt="Duke Energy Logo"> Duke Energy Gateway
 
 [![GitHub Release][releases-shield]][releases]
@@ -15,10 +19,6 @@
 This is a custom integration for [Home Assistant](https://www.home-assistant.io/). It pulls real-time energy usage from Duke Energy via the Duke Energy Gateway pilot program.
 
 This integration leverages the [`pyduke-energy`](https://github.com/mjmeli/pyduke-energy) library, also written by me, to pull data. This API is _very_ unofficial and may stop working at any time (see [Disclaimer](https://github.com/mjmeli/pyduke-energy#Disclaimer)).
-
-## IMPORTANT - Deprecation Warning
-
-Duke Energy is shutting down the Gateway pilot program at the end of June. This integration will stop functioning and will be deprecated.
 
 ## Pre-Requisites! (Please Read)
 
